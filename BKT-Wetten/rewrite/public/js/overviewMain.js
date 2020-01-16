@@ -1,9 +1,6 @@
 let loggedIn = window.localStorage.getItem("loggedIn");
 let accountId = window.localStorage.getItem("accountId");
 
-console.log(loggedIn);
-console.log(accountId);
-
 if(loggedIn == null){
     alert("you are not logged in.")
     localStorage.clear();
