@@ -1,0 +1,16 @@
+html
+	head
+		title BKT-Wetten
+		script(type="module", src="js/overviewMain.js")
+	body
+		section(id="profile")
+			h1 Profile
+			p(id="overviewProfileName")
+			p(id="overviewProfileRank")
+			p(id="overviewProfileMoney")
+			Button(id="gotoProfileButton") goto profile
+			p
+			Button(id="logoutProfileButton") logout
+			Button(id="refreshBetsButton") refresh bets
+		section(id="activeBets")
+			h1 Active Bets

@@ -2,80 +2,119 @@ const bodyParser = require("body-parser");
 const express = require("express");
 const sqlite3 = require("sqlite3");
 
-
+//#region sqlLite
 const db = new sqlite3.Database("./data/database.db", (err) => {
     if (err) {
       console.error("[initializingDatabase]" + err.message);
     }
 });
 
-
-function fetchAccounts(){
-    let accounts;
+function fetchAccounts(callback){
     db.all("SELECT * FROM accounts", [], (err, rows) => {
         if (err) {
             console.error("[fetchAccounts]" + err.message);
         }
         else {
-            accounts = rows;
+            callback(rows);
         }
     });
-    return accounts;
 }
 
-
-function fetchBets(){
-    let bets = []
-
-    return bets
+function fetchBets(callback){
+    db.all("SELECT * FROM bets", [], (err, rows) => {
+        if (err) {
+            console.error("[fetchBets]" + err.message);
+        }
+        else {
+            callback(rows);
+        }
+    });
 }
+
+function fetchDatabase(){
+    fetchAccounts(function(rows) {
+        accounts = rows
+    });
+    
+    fetchBets(function(rows) {
+        bets = rows
+    });
+}
+
+function createAccount(name, password, rank, money, callback){
+    let createAccountQuery = "INSERT INTO accounts(name,password,rank,money) VALUES (?,?,?,?)"
+    db.all(createAccountQuery, [name, password, rank, money], (err, rows) => {
+        if (err) {
+            console.error("[accountCreation]" + err.message);
+        }else{
+            callback(rows);
+        }
+    });
+}
+
+let accounts = [];
+let bets = [];
+
+fetchDatabase();
+
+//#endregion
 
 const app = express();
-const accounts = fetchAccounts();
-console.log(accounts);
 app.set("view engine", "pug");
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.get("/", (req, res) => {
+  fetchDatabase();
   res.render("index");
+});
+
+app.get("/overview", (req, res) => {
+    fetchDatabase();
+    res.render("overview");
+});
+
+app.get("/createBet", (req, res) => {
+    fetchDatabase();
+    res.render("createBet");
+});
+
+app.get('/bets', function (req, res) {
+    fetchDatabase();
+    res.send(bets);
+});
+
+app.post("/login",function(req,res){
+    let data = req.body;
+    data = JSON.stringify(data).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2).split(";")[0];
+    if(data != "."){
+        data = data.split(".");
+        let username = data[0]
+        let password = data[1]
+        console.log(username);
+        console.log(password);
+        accounts.forEach(account => {
+            if(account.name.toLowerCase() == username.toLowerCase()){
+                if(account.password == password){
+                    res.end("logged in;" + account.id);
+                }else{
+                    res.end("incorrect password");
+                }
+            }else{
+                res.end("there is no account with this username");
+            }
+        });
+    }else{
+        res.end("no login credentials were given");
+    }
 });
 
 const server = app.listen(7000, () => {
     console.log(`Express running → PORT ${server.address().port}`);
 });
 
-function createAccount(name, password, rank, money){
-    let createAccountQuery = "INSERT INTO accounts(name,password,rank,money) VALUES (?,?,?,?)"
-    db.all(createAccountQuery, [name, password, rank, money], (err, rows) => {
-        if (err) {
-            console.error("[accountCreation]" + err.message);
-        }else{
-            rows.forEach((row) => {
-                console.log(row);
-            });
-        }
-    });
-}
-
-// app.get("/overview", (req, res) => {
-//   res.render("overview");
-// });
-
-// app.get("/profile", (req, res) => {
-//   res.render("profile");
-// });
-
-// app.get("/createBet", (req, res) => {
-//   res.render("createBet");
-// });
-
-// app.get('/bets', function (req, res) {
-//     res.send(bets);
-// });
-  
-// app.post("/createBetPost",function(req,res){
+// app.post("/createBet",function(req,res){
 //   let data = req.body;
 //   data = JSON.stringify(data).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2);
 //   data = data.split(";");
@@ -99,27 +138,6 @@ function createAccount(name, password, rank, money){
 //     appendParticipantToBed(betId, accountId);
 // });
 
-
-// function getBed(bedId){
-//   let bed_;
-//   bets.forEach(bed => {
-//     if(bed.id == bedId){
-//       bed_ = bed
-//     }
-//   });
-//   return bed_;
-// }
-
-// function getAccount(accountId){
-//   let account_;
-//   accounts.forEach(account => {
-//     if(account.id == accountId){
-//       account_ = account
-//     }
-//   });
-//   return account_
-// }
-
 // function appendParticipantToBed(bedId, accountId){
 //   let bed = getBed(bedId);
 //   let account = getAccount(accountId);
@@ -132,4 +150,3 @@ function createAccount(name, password, rank, money){
 //   console.log("moneypool updated of id:" + bed.id);
 //   console.log("new moneypool:" + bed.moneypool); 
 // }
-
