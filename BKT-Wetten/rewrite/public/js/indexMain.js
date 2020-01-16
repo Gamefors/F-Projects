@@ -1,4 +1,5 @@
 window.localStorage.clear();
+
 function sendPostRequest(data, type) {
     var xhttp = new XMLHttpRequest();
     xhttp.open("POST", "http://" + window.location.host + "/" + type, false);
@@ -6,6 +7,7 @@ function sendPostRequest(data, type) {
     xhttp.send(data);
     return xhttp.responseText
 }
+
 function login(){
     let username = document.getElementById("loginUsernameEntry").value;
     let password = document.getElementById("loginPasswordEntry").value;
