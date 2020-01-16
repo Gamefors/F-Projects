@@ -91,7 +91,6 @@ app.get("/", (req, res) => {
 app.get("/overview", (req, res) => {
     fetchDatabase();
     res.render("overview");
-    console.log(bets);
 });
 
 app.get("/createBet", (req, res) => {
@@ -154,38 +153,30 @@ app.post("/createBet",function(req,res){
     let bet = {teacher:data[0], startTime:data[1] , minBet:data[2], highestBet:data[3], moneyPool:data[4], participants:data[5]}
     createBet(bet);
     res.end("created bet.");
-  });
+});
+
+app.post("/getBets",function(req,res){
+    fetchDatabase();
+    let respons = "";
+    
+    bets.forEach(bet => {
+        let queriedAccount = "niemand";
+        if(bet.highestBet != ""){
+            accounts.forEach(account => {
+                if(account.id == bet.highestBet){
+                    queriedAccount = account
+                    queriedAccount = queriedAccount.name
+                }
+            });
+        }
+        //do partipipants hereTODO:finish this 
+        respons = respons + "*" + bet.id + ";" + bet.teacher + ";" + bet.startTime + ";" + bet.minBet + ";" + bet.moneyPool + ";" + queriedAccount + ";" + bet.participants // id to account conversion needs to be done
+    });
+    respons = respons.substr(1);
+    res.end(respons);
+});
 
 const server = app.listen(7000, () => {
     fetchDatabase();
     console.log(`Express running → PORT ${server.address().port}`);
 });
-
-
-
-// app.post("/enterBet",function(req,res){
-//     let data = req.body;
-//     data = JSON.stringify(data).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2);
-//     data = data.split(";");
-//     console.log("Got bid entry:")
-//     console.log(data)
-//     let betId = data[0]
-//     let accountId = data[1]
-//     let biddedMoney = data[2]
-//     let lateTime = data[3]
-//     addMoneyToBedPool(betId, biddedMoney);
-//     appendParticipantToBed(betId, accountId);
-// });
-
-// function appendParticipantToBed(bedId, accountId){
-//   let bed = getBed(bedId);
-//   let account = getAccount(accountId);
-//   bed.participants = bed.participants + ";" + account.id
-// }
-
-// function addMoneyToBedPool(id , money){
-//   let bed = getBed(id);
-//   bed.moneypool = (parseInt(bed.moneypool) + parseInt(money)).toString()
-//   console.log("moneypool updated of id:" + bed.id);
-//   console.log("new moneypool:" + bed.moneypool); 
-// }
