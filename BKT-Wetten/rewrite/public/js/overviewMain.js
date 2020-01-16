@@ -23,7 +23,6 @@ function logout(){
 function getAccount(accountId){
     let response = sendPostRequest(accountId, "getAccount");
     if(response == "error"){
-        console.log("1");
         return null
     }
     response = response.split(";");

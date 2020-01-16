@@ -52,6 +52,24 @@ function createAccount(name, password, rank, money, callback){
     });
 }
 
+function createBetOnDatabase(teacher, startTime, minBet, moneyPool, highestBet, participants, callback){
+    let createBetQuery = "INSERT INTO bets(teacher,startTime,minBet,moneyPool,highestBet,participants) VALUES (?,?,?,?,?,?)"
+    db.all(createBetQuery, [teacher, startTime, minBet, moneyPool, highestBet, participants], (err, rows) => {
+        if (err) {
+            console.error("[BetCreation]" + err.message);
+        }else{
+            callback(rows);
+        }
+    });
+}
+
+function createBet(bet){
+    createBetOnDatabase(bet.teacher, bet.startTime, bet.minBet, bet.moneyPool, bet.highestBet, bet.participants , function(rows){
+        console.log(rows);
+    });
+    fetchDatabase();
+}
+
 let accounts = [];
 let bets = [];
 
@@ -73,6 +91,7 @@ app.get("/", (req, res) => {
 app.get("/overview", (req, res) => {
     fetchDatabase();
     res.render("overview");
+    console.log(bets);
 });
 
 app.get("/createBet", (req, res) => {
@@ -86,6 +105,7 @@ app.get('/bets', function (req, res) {
 });
 
 app.post("/login",function(req,res){
+    fetchDatabase();
     let data = req.body;
     data = JSON.stringify(data).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2).split(";")[0];
     if(data != "."){
@@ -109,6 +129,7 @@ app.post("/login",function(req,res){
 });
 
 app.post("/getAccount",function(req,res){
+    fetchDatabase();
     let data = req.body;
     data = JSON.stringify(data).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2).split(";")[0];
     if(data != ""){
@@ -125,19 +146,22 @@ app.post("/getAccount",function(req,res){
     }
 });
 
+app.post("/createBet",function(req,res){
+    fetchDatabase();
+    let data = req.body;
+    data = JSON.stringify(data).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2);
+    data = data.split(";");
+    let bet = {teacher:data[0], startTime:data[1] , minBet:data[2], highestBet:data[3], moneyPool:data[4], participants:data[5]}
+    createBet(bet);
+    res.end("created bet.");
+  });
+
 const server = app.listen(7000, () => {
+    fetchDatabase();
     console.log(`Express running → PORT ${server.address().port}`);
 });
 
-// app.post("/createBet",function(req,res){
-//   let data = req.body;
-//   data = JSON.stringify(data).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2);
-//   data = data.split(";");
-//   let bet = {teacherName:data[0], startTime:data[1] , minBet:data[2], highestbidder:data[3], moneypool:data[4], participants:data[5],id:data[6]}
-//   bets.push(bet);
-//   console.log("created bet:")
-//   console.log(bet)
-// });
+
 
 // app.post("/enterBet",function(req,res){
 //     let data = req.body;
