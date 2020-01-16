@@ -92,8 +92,6 @@ app.post("/login",function(req,res){
         data = data.split(".");
         let username = data[0]
         let password = data[1]
-        console.log(username);
-        console.log(password);
         accounts.forEach(account => {
             if(account.name.toLowerCase() == username.toLowerCase()){
                 if(account.password == password){
@@ -107,6 +105,23 @@ app.post("/login",function(req,res){
         });
     }else{
         res.end("no login credentials were given");
+    }
+});
+
+app.post("/getAccount",function(req,res){
+    let data = req.body;
+    data = JSON.stringify(data).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2).split(";")[0];
+    if(data != ""){
+        let accountId = data
+        let queriedAccount;
+        accounts.forEach(account => {
+            if(account.id == accountId){
+                queriedAccount = account
+            }
+        });
+        res.end(queriedAccount.id + ";" + queriedAccount.name + ";" + queriedAccount.password + ";" + queriedAccount.rank + ";" + queriedAccount.money);
+    }else{
+        res.end("error");
     }
 });
 
