@@ -36,7 +36,7 @@ function getBets(){
 }
 
 function refreshBets(){
-    bets = getBets();
+    document.location.reload()
 }
 
 function getAccount(accountId){
@@ -69,8 +69,8 @@ bets = getBets();
 
 document.getElementById("overviewProfileId").innerText = "Id: " + account.id
 document.getElementById("overviewProfileName").innerText = "Name: " + account.name
-document.getElementById("overviewProfileRank").innerText = "Rank: " + account.rank
-document.getElementById("overviewProfileMoney").innerText = "Money: " + account.money + "€"
+document.getElementById("overviewProfileRank").innerText = "Rang: " + account.rank
+document.getElementById("overviewProfileMoney").innerText = "Geld: " + account.money + "€"
 
 function gotoCreateBet(){
     window.location.href = "/createBet"
@@ -78,7 +78,7 @@ function gotoCreateBet(){
 
 if(account.rank == "admin"){
     let createBetButton = document.createElement("button");
-    createBetButton.innerText = "create bet"
+    createBetButton.innerText = "Neue Wette erstellen"
     let profileSection = document.getElementById("profile");
     createBetButton.addEventListener("click", gotoCreateBet, false);
     profileSection.appendChild(createBetButton);
@@ -100,7 +100,7 @@ function createActiveBets(bets){
     activeBetsSectionNew.setAttribute("id", "activeBets")
     document.body.appendChild(activeBetsSectionNew);
     let h1 = document.createElement("h1");
-    h1.innerText = "Active Bets"
+    h1.innerText = "Aktive Wetten"
     activeBetsSectionNew.appendChild(h1)
     
     
@@ -151,7 +151,7 @@ function createActiveBets(bets){
         }, false);
         div.appendChild(name);
         div.appendChild(startTime_);
-        div.appendChild(highestBider);
+        //div.appendChild(highestBider);
         div.appendChild(participantsP);
         div.appendChild(participantsDiv);
         participantsP.innerText = "Teilnehmer: "
@@ -168,7 +168,7 @@ function createActiveBets(bets){
                         notBettedYet = false
                     }
                     let participantname = document.createElement("p");
-                    participantname.innerText = account_.name + " mit " + newName[1] + "€" + " verspätung: " + newName[2]
+                    participantname.innerText = "-" + account_.name + " mit " + newName[1] + "€" + " verspätung: " + newName[2]
                     participantsDiv.appendChild(participantname);
                 }
                 
@@ -184,6 +184,9 @@ function createActiveBets(bets){
             }
             
         }else{
+            let participantname = document.createElement("p");
+            participantname.innerText = "-noch keine Teilnehmer"
+            participantsDiv.appendChild(participantname);
             div.appendChild(yourbidP);
             div.appendChild(bedInput);
             div.appendChild(howLateTimeP);
@@ -206,7 +209,9 @@ function createActiveBets(bets){
 
 function endBet(betId){
     let response = sendPostRequest(betId,"endBet");
-    console.log(response + "won the moneypool");
+    console.log(response + " won");
+    alert(response + " won");
+    document.location.reload();
 }
 
 function placeBet(betId){
@@ -227,4 +232,5 @@ function placeBet(betId){
     }else{
         //TODO: show to user that he doesnt have enough money
     }
+    document.location.reload()
 }

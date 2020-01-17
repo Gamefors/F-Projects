@@ -211,6 +211,29 @@ app.post("/getAccount",function(req,res){
     }
 });
 
+app.post("/getAccountStats",function(req,res){
+    fetchDatabase();
+    let data = req.body;
+    data = JSON.stringify(data).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2).split(";")[0];
+    if(data != ""){
+        let accountId = data
+        let queriedAccount;
+        accounts.forEach(account => {
+            if(account.id == accountId){
+                queriedAccount = account
+            }
+        });
+        if(queriedAccount == undefined){
+            res.end("error");
+        }else{
+            res.end(queriedAccount.wins + ";" + queriedAccount.moneyFromBets);
+        }
+    }else{
+        res.end("error");
+    }
+});
+
+
 app.post("/getAccountByName",function(req,res){
     fetchDatabase();
     let data = req.body;
