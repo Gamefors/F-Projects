@@ -23,7 +23,7 @@ let wins = document.createElement("p");
 let moneyFromBets = document.createElement("p");
 
 wins.innerText = "Wetten gewonnen: " + account[0]
-moneyFromBets.innerText = "Geld durch Wetten eingenomen: " + account[1]
+moneyFromBets.innerText = "Geld durch Wetten eingenommen: " + account[1]
 
 body.appendChild(wins);
 body.appendChild(moneyFromBets);

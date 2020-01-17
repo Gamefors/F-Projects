@@ -2,8 +2,9 @@ html
 	head
 		title BKT-Wetten
 		script(type="module", src="js/overviewMain.js")
+		link(rel="stylesheet", type="text/css", href="css/overview.css")
 	body
-		section(id="profile")
+		section(id="profile" class="profile")
 			h1 Profil
 			p(id="overviewProfileId")
 			p(id="overviewProfileName") 
@@ -11,7 +12,9 @@ html
 			p(id="overviewProfileMoney") 
 			Button(id="refreshBetsButton") wetten neu laden
 			p
+			Button(id="statsButton") deine statisik
+			p
 			Button(id="logoutProfileButton") logout
 			p
-		section(id="activeBets")
-			h1 Active Bets
+		section(id="activeBets" class="activeBets")
+			h1 Aktive Wetten

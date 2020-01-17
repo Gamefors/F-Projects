@@ -63,6 +63,13 @@ logoutProfileButton.addEventListener("click", logout, false);
 let refreshBetsButton = document.getElementById("refreshBetsButton");
 refreshBetsButton.addEventListener("click", refreshBets, false);
 
+let statsButton = document.getElementById("statsButton");
+statsButton.addEventListener("click", gotoStats, false);
+
+function gotoStats(){
+    window.location.href = "/stats"
+}
+
 let account = getAccount(accountId);
 let bets;
 bets = getBets();
@@ -120,7 +127,7 @@ function createActiveBets(bets){
         let spacer = document.createElement("p");
         let submitButton = document.createElement("button");
         let spacer2 = document.createElement("p");
-        spacer2.innerText = "========================================"
+        spacer2.innerText = ""
     
         name.innerText = "Lehrer Name: " + bet.teacher
         startTime_.innerText = "Unterrichtsstunde startet um: " + bet.startTime
@@ -138,7 +145,7 @@ function createActiveBets(bets){
         }
         
         
-        yourbidP.innerText = "Deine Wette: "
+        yourbidP.innerText = "Deine Wette(nur Zahl): "
         yourbidP.setAttribute("id", "yourbidP" + bet.id);
         bedInput.setAttribute("id", "bedInput" + bet.id);
         howLateTimeP.innerText = "Wie viel verspätung (in minuten):"

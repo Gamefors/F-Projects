@@ -41,16 +41,16 @@ function fetchDatabase(){
     });
 }
 
-// function createAccount(name, password, rank, money, callback){
-//     let createAccountQuery = "INSERT INTO accounts(name,password,rank,money) VALUES (?,?,?,?)"
-//     db.all(createAccountQuery, [name, password, rank, money], (err, rows) => {
-//         if (err) {
-//             console.error("[accountCreation]" + err.message);
-//         }else{
-//             callback(rows);
-//         }
-//     });
-// }
+function createAccount(name, password){
+    let createAccountQuery = "INSERT INTO accounts(name,password,rank,money,wins,moneyFromBets) VALUES (?,?,?,?,?,?)"
+    db.all(createAccountQuery, [name, password, "user", "500", "0", "0"], (err, rows) => {
+        if (err) {
+            console.error("[accountCreation]" + err.message);
+        }else{
+            console.log("[INFO] created new account: Name: " + name + " Password: " + password)
+        }
+    });
+}
 
 function createBetOnDatabase(teacher, startTime, minBet, moneyPool, highestBet, participants, callback){
     let createBetQuery = "INSERT INTO bets(teacher,startTime,minBet,moneyPool,highestBet,participants) VALUES (?,?,?,?,?,?)"
@@ -152,9 +152,9 @@ app.get("/createBet", (req, res) => {
     res.render("createBet");
 });
 
-app.get('/bets', function (req, res) {
+app.get('/register', function (req, res) {
     fetchDatabase();
-    res.send(bets);
+    res.render("register");
 });
 
 app.post("/login",function(req,res){
@@ -206,6 +206,20 @@ app.post("/getAccount",function(req,res){
         }else{
             res.end(queriedAccount.id + ";" + queriedAccount.name + ";" + queriedAccount.password + ";" + queriedAccount.rank + ";" + queriedAccount.money);
         }
+    }else{
+        res.end("error");
+    }
+});
+
+app.post("/createAccount",function(req,res){
+    fetchDatabase();
+    let data = req.body;
+    data = JSON.stringify(data).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2).split(";")[0];
+    if(data != ""){
+        console.log(data);
+        data = data.split(".");
+        createAccount(data[0], data[1]);
+        res.end("created account");
     }else{
         res.end("error");
     }
