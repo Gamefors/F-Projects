@@ -41,16 +41,16 @@ function fetchDatabase(){
     });
 }
 
-function createAccount(name, password, rank, money, callback){
-    let createAccountQuery = "INSERT INTO accounts(name,password,rank,money) VALUES (?,?,?,?)"
-    db.all(createAccountQuery, [name, password, rank, money], (err, rows) => {
-        if (err) {
-            console.error("[accountCreation]" + err.message);
-        }else{
-            callback(rows);
-        }
-    });
-}
+// function createAccount(name, password, rank, money, callback){
+//     let createAccountQuery = "INSERT INTO accounts(name,password,rank,money) VALUES (?,?,?,?)"
+//     db.all(createAccountQuery, [name, password, rank, money], (err, rows) => {
+//         if (err) {
+//             console.error("[accountCreation]" + err.message);
+//         }else{
+//             callback(rows);
+//         }
+//     });
+// }
 
 function createBetOnDatabase(teacher, startTime, minBet, moneyPool, highestBet, participants, callback){
     let createBetQuery = "INSERT INTO bets(teacher,startTime,minBet,moneyPool,highestBet,participants) VALUES (?,?,?,?,?,?)"
@@ -61,6 +61,44 @@ function createBetOnDatabase(teacher, startTime, minBet, moneyPool, highestBet, 
             callback(rows);
         }
     });
+    fetchDatabase();
+}
+
+function updateAccountMoney(accountId, newBalance){
+    let updateAccountMoneyQuery = "UPDATE accounts SET money = '" + newBalance + "' WHERE id = '" + accountId + "'"
+    db.all(updateAccountMoneyQuery, [], (err, rows) => {
+        if (err) {
+            console.error("[updateAccountMoney]" + err.message);
+        }else{
+            
+        }
+    });
+    fetchDatabase();
+}
+
+function addParticipantToBet(betId, accountId, biddedMoney, delayTime, callback){
+    let queriedAccount;
+    accounts.forEach(account => {
+        if(account.id == accountId){
+            queriedAccount = account
+        }
+    });
+    let newAccountBalance = queriedAccount.money - biddedMoney 
+    updateAccountMoney(accountId, newAccountBalance);
+    fetchDatabase();
+
+    
+    let getBetQuery = "SELECT * FROM bets ' WHERE id = '" + betId + "'"
+    db.all(getBetQuery, [], (err, rows) => {
+        if (err) {
+            console.error("[addParticipantToBet]" + err.message);
+        }else{
+            callback(rows);
+        }
+    });    
+
+    
+    fetchDatabase();
 }
 
 function createBet(bet){
@@ -174,6 +212,34 @@ app.post("/getBets",function(req,res){
     });
     respons = respons.substr(1);
     res.end(respons);
+});
+
+app.post("/enterBet",function(req,res){
+    fetchDatabase();
+    let data = req.body;
+    data = JSON.stringify(data).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2);
+    data = data.split(";");
+    let betId = data[0]
+    let accountId = data[1]
+    let biddedMoney = data[2]
+    let delayTime = data[3]//TODO: implement this
+    addParticipantToBet(betId, accountId, biddedMoney, delayTime, function(bet){
+        console.log(bet);
+        //to caolculating new things here
+        let newMoneyPool = "123245678909";
+        let newHighestBet = "error";
+        let newParticipants = "error";
+        console.log(betId);
+        let addParticipantToBetQuery = "UPDATE bets SET 'moneyPool' = '" + newMoneyPool + "', 'highestBet' = '" + newHighestBet + "', 'participants' = '" + newParticipants + "' WHERE id = '" + betId + "'"
+        db.all(addParticipantToBetQuery, [], (err, rows) => {
+            if (err) {
+                console.error("[addParticipantToBet]" + err.message);
+            }else{
+                
+            }
+        });
+    });
+    res.end("")
 });
 
 const server = app.listen(7000, () => {

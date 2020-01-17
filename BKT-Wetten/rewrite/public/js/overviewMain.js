@@ -1,4 +1,3 @@
-
 let loggedIn = window.localStorage.getItem("loggedIn");
 let accountId = window.localStorage.getItem("accountId");
 
@@ -41,7 +40,6 @@ function refreshBets(){
 }
 
 function getAccount(accountId){
-    console.log(accountId);
     let response = sendPostRequest(accountId, "getAccount");
     if(response == "error"){
         return null
@@ -78,6 +76,9 @@ if(account.rank == "admin"){
 
 createActiveBets(bets)
 
+
+
+//TODO: tidy up this function
 function createActiveBets(bets){
     if(bets[0].teacher == undefined){
         return null
@@ -162,7 +163,7 @@ function createActiveBets(bets){
                     div.appendChild(spacer);
                     div.appendChild(submitButton);
                 }else{
-                    // TODO: here can other things be dislayed like how much u have betted etc
+                    // TODO: here can other things be dislayed like u already set a bet
                 }
                 participantsDiv.appendChild(participantname);
             });
@@ -177,4 +178,19 @@ function createActiveBets(bets){
         div.appendChild(spacer2);
         activeBetsSectionNew.appendChild(div);
     });
+}
+
+function placeBet(betId){
+    let div = document.getElementById("betDiv" + betId);
+    let inputMoney = document.getElementById("bedInput"+ betId)
+    let inputTime = document.getElementById("howLateInput" + betId)
+    let yourBidP = document.getElementById("yourbidP" + betId)
+    let howLateTimeP = document.getElementById("howLateTimeP" + betId)
+    let submitButton = document.getElementById("submitButton" + betId)
+    div.removeChild(inputMoney);
+    div.removeChild(inputTime);
+    div.removeChild(yourBidP);
+    div.removeChild(howLateTimeP);
+    div.removeChild(submitButton);
+    sendPostRequest(betId + ";" + account.id + ";" + inputMoney.value + ";" + inputTime.value, "enterBet");
 }
