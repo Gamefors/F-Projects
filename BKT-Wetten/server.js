@@ -354,7 +354,7 @@ app.post("/endBet",function(req,res){
         }
     });
     updateAccountStats(queriedAccount.id, (parseInt(queriedAccount.wins) + 1).toString(), (parseInt(queriedAccount.moneyFromBets) + parseInt(queriedBet.moneyPool) * 2).toString());
-    updateAccountMoney(queriedAccount.id, ((parseInt(queriedBet.moneyPool) * 2) + queriedAccount.money).toString());
+    updateAccountMoney(queriedAccount.id, ((parseInt(queriedBet.moneyPool) * 2) + parseInt(queriedAccount.money)).toString());
     db.all("DELETE FROM bets WHERE id = '" + queriedBet.id + "'", [], (err, rows) => {
         if (err) {
             console.error("[DeleteBet]" + err.message);
