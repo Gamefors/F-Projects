@@ -22,8 +22,9 @@ function createBet(){
     let teacherName_ = document.getElementById("teacherName");
     let startTime_ = document.getElementById("startTime");
     let minBet_ = document.getElementById("minBet");
-    let bet = {teacherName:teacherName_.value, startTime:"10:00" , minBet:"10", highestbidder:"", moneypool:0, participants:""}
+    let bet = {teacherName:teacherName_.value, startTime:startTime_.value , minBet:"10", highestbidder:"", moneypool:0, participants:""}
     let response = sendPostRequest(bet.teacherName + ";" + bet.startTime + ";" + bet.minBet + ";" + bet.highestbidder + ";" + bet.moneypool + ";" + bet.participants, "createBet");
     let info = document.getElementById("info");
     info.innerText = response
+    window.location.href = "/overview"
 }
