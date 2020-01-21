@@ -1,3 +1,5 @@
+//TODO: normalize numbers either strings or ints 
+
 const bodyParser = require("body-parser");
 const express = require("express");
 const sqlite3 = require("sqlite3");
@@ -323,46 +325,87 @@ app.post("/checkBalance",function(req,res){
 });
 
 app.post("/endBet",function(req,res){
-    let data = req.body;
-    data = JSON.stringify(data).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2).split(";")[0]; 
-    let today = new Date();
-    let time = today.getMinutes()
+    let data = JSON.stringify(req.body).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2).split(";")[0]; 
     let queriedBet;
     bets.forEach(bet => {
         if(bet.id == data)[
             queriedBet = bet
         ]
     });
-    let participants = queriedBet.participants;
-    participants = participants.split("_");
-    let nearestParticipant = participants[1];
+    let participants = queriedBet.participants.split("/")
+    participants.shift();
+    let tempParticipants = []
     participants.forEach(participant => {
-        if(participant != ""){
-            participant = participant.split(":");
-            let currParticipantTimeDiff = parseInt(time) - parseInt(participant[2])
-            let nearestParticipantTimeDiff = parseInt(time) - parseInt(nearestParticipant[2]) 
-            if(currParticipantTimeDiff < nearestParticipantTimeDiff){
+        participant = participant.split(":");
+        let tempParticipant = {name:participant[0], biddedMoney:participant[1], delayTime:participant[2]}
+        tempParticipants.push(tempParticipant)
+    });
+    participants = tempParticipants
+    let nearestParticipant = participants[0];
+    console.log("[endBet] Ending bet with id: " + queriedBet.id);
+    console.log("[endBet] Participants:");
+    participants.forEach(participant => {
+        console.log("[endBet] " + participant.name + " mit " + participant.biddedMoney + "€ und " + participant.delayTime + " Minuten verspätung.")
+        
+    });
+    console.log("[endBet] Currently winning participant: " + nearestParticipant.name);
+    
+    let today = new Date();
+    let time = today.getMinutes()
+    
+    let winners = []
+    
+    participants.forEach(participant => {
+        let currParticipantTimeDiff = parseInt(time) - parseInt(participant.delayTime)
+        let nearestParticipantTimeDiff = parseInt(time) - parseInt(nearestParticipant.delayTime) 
+        console.log("[winnerEvalutation] Current participant: " + participant.name + " mit " + participant.delayTime + " Minuten verspätung. Zeit Differentz: " + currParticipantTimeDiff)
+        console.log("[winnerEvalutation] Nearest/Winner participant: " + nearestParticipant.name + " mit " + nearestParticipant.delayTime + " Minuten verspätung. Zeit Differentz: " + nearestParticipantTimeDiff)
+        
+        if(currParticipantTimeDiff < nearestParticipantTimeDiff){
+            if(parseInt(time) <= 30){
                 nearestParticipant = participant
+                console.log("[endBet] New winning participant: " + nearestParticipant.name); 
+            }
+        }else if(currParticipantTimeDiff == nearestParticipantTimeDiff){
+            if(nearestParticipant != participant){
+                winners.push(participant);
+                console.log("[WinnerEvaluation] Added new winning participant because of same delayTime: " + participant.name);
+            }
+        }else{
+            if(parseInt(time) >= 30){
+                nearestParticipant = participant
+                console.log("[endBet] New winning participant: " + nearestParticipant.name); 
             }
         }
     });
+    winners.push(nearestParticipant);
+    console.log("[endBet] Final winners:");
+    winners.forEach(participant => {
+        console.log("[endBet] " + participant.name + " mit " + participant.biddedMoney + "€ und " + participant.delayTime + " Minuten verspätung.")
+        
+    });
+    nearestParticipant = winners[Math.floor(Math.random() * winners.length)]
+    console.log("[endBet] Final winning participant: " + nearestParticipant.name);
     let queriedAccount;
-    nearestParticipant = nearestParticipant.split(":");
     accounts.forEach(account => {
-        if(account.name.toLowerCase() == nearestParticipant[0].toLowerCase()){
+        if(account.name.toLowerCase() == nearestParticipant.name.toLowerCase()){
             queriedAccount = account
         }
     });
+    
     updateAccountStats(queriedAccount.id, (parseInt(queriedAccount.wins) + 1).toString(), (parseInt(queriedAccount.moneyFromBets) + parseInt(queriedBet.moneyPool) * 2).toString());
+    
     updateAccountMoney(queriedAccount.id, ((parseInt(queriedBet.moneyPool) * 2) + parseInt(queriedAccount.money)).toString());
+
     db.all("DELETE FROM bets WHERE id = '" + queriedBet.id + "'", [], (err, rows) => {
         if (err) {
-            console.error("[DeleteBet]" + err.message);
+            console.error("[endBet/SqLite]" + err.message);
         }
         else {
+            console.log("[endBet/SqLite] Deleted bet with id: " + queriedBet.id)
         }
     });
-    res.end(nearestParticipant[0]);
+    res.end(nearestParticipant.name + ";" + nearestParticipant.biddedMoney + ";" + nearestParticipant.delayTime);
 });
 
 
@@ -375,7 +418,7 @@ app.post("/enterBet",function(req,res){
     let betId = data[0]
     let accountId = data[1]
     let biddedMoney = data[2]
-    let delayTime = data[3]//TODO: implement this
+    let delayTime = data[3]
 
     addParticipantToBet(betId, accountId, biddedMoney, delayTime, function(bet_){
         fetchDatabase();
@@ -387,7 +430,7 @@ app.post("/enterBet",function(req,res){
             }
         });
         let newMoneyPool = (parseInt(bet.moneyPool) + parseInt(biddedMoney)).toString();
-        let newParticipants = bet.participants + "_" + queriedAccount.name + ":" + biddedMoney + ":" + delayTime;
+        let newParticipants = bet.participants + "/" + queriedAccount.name + ":" + biddedMoney + ":" + delayTime;
         let newHighestBet = "error:error";
         let newParticipantsList = newParticipants.split(";");
         newParticipantsList.forEach(participant => {

@@ -165,7 +165,7 @@ function createActiveBets(bets){
         if(bet.participants != ""){
             let accountNames = bet.participants;
             let notBettedYet = true
-            accountNames = accountNames.split("_");
+            accountNames = accountNames.split("/");
             console.log(accountNames);
             accountNames.forEach(name => {
                 if(name != ""){
