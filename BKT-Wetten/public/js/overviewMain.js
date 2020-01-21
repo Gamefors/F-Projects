@@ -23,7 +23,7 @@ function logout(){
 function getBets(){
     bets = []
     let response = sendPostRequest("", "getBets");
-    if(response == "error"){
+    if(response == "ERROR"){
         return null
     }
     response = response.split("*");
@@ -41,7 +41,7 @@ function refreshBets(){
 
 function getAccount(accountId){
     let response = sendPostRequest(accountId, "getAccount");
-    if(response == "error"){
+    if(response == "ERROR"){
         return null
     }
     response = response.split(";");
@@ -50,7 +50,7 @@ function getAccount(accountId){
 
 function getAccountByName(accountName){
     let response = sendPostRequest(accountName, "getAccountByName");
-    if(response == "error"){
+    if(response == "ERROR"){
         return null
     }
     response = response.split(";");

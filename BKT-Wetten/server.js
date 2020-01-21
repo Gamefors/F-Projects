@@ -1,15 +1,26 @@
 //TODO: normalize numbers either strings or ints 
+//#region require
+
 const bodyParser = require("body-parser");
 const express = require("express");
 const sqlite3 = require("sqlite3");
 
+//#endregion
+
+//#region express
+
+//creating express server
 const app = express();
 
+//setting express view engine
 app.set("view engine", "pug");
 
+//express app settings
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+//#endregion
 
 //#region sqlLite
 const db = new sqlite3.Database("./data/database.db", (err) => {
@@ -261,7 +272,6 @@ app.post("/createAccount",function(req,res){
             if(result.length == 0){
                 createAccount(data[0], data[1]);
                 res.end("true");
-                console.log("[accountCreation] New account with name: " + data[0] + " and password: " + data[1] + " created.")
             }else{
                 res.end("Ein Account mit diesem Namen existiert bereits.");
             }
@@ -277,6 +287,7 @@ app.post("/deleteAccount",function(req,res){
     data = JSON.stringify(data).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2).split(";")[0];
     if(data != ""){
         deleteAccount(data);
+        res.end("Account was deleted.")
     }else{
         res.end("[ERROR] no data was given");
     }
@@ -342,16 +353,23 @@ app.post("/getBets",function(req,res){
         if(bet.highestBet != ""){
             accounts.forEach(account => {
                 let highestBetter = bet.highestBet.split(":");
-
                 if(account.name.toLowerCase() == highestBetter[0].toLowerCase()){
                     queriedAccount = account
                     queriedAccount = queriedAccount.name
                 }
             });
         }
-        //do partipipants hereTODO:finish this 
-        
-        respons = respons + "*" + bet.id + ";" + bet.teacher + ";" + bet.startTime + ";" + bet.minBet + ";" + bet.moneyPool + ";" + queriedAccount + ";" + bet.participants // id to account conversion needs to be done
+        respons = respons + "*" + bet.id + ";" + bet.teacher + ";" + bet.startTime + ";" + bet.minBet + ";" + bet.moneyPool + ";" + queriedAccount + ";" + bet.participants
+    });
+    respons = respons.substr(1);
+    res.end(respons);
+});
+
+app.post("/getAccounts",function(req,res){
+    fetchDatabase();
+    let respons = "";
+    accounts.forEach(account => {
+        respons = respons + "*" + account.id + ";" + account.name + ";" + account.password + ";" + account.rank + ";" + account.money + ";" + account.wins + ";" + account.moneyFromBets
     });
     respons = respons.substr(1);
     res.end(respons);
@@ -513,7 +531,12 @@ app.post("/enterBet",function(req,res){
 
 //#endregion
 
+//starting express server
 const server = app.listen(7000, () => {
+    
+    //fetching sqlite database
     fetchDatabase();
+
     console.log("Started express server on port: " + server.address().port);
+
 });

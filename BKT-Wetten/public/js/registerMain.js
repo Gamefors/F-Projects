@@ -21,18 +21,21 @@ function register(){
     let registerButton = document.getElementById("registerButton");
     if(((username.includes("/") || username.includes(";")) || (username.includes(":") || username.includes("."))) || ((password.includes("/") || password.includes(";")) || (password.includes(":") || password.includes(".")))){
         alert("Benutzername oder Passwort enthält unzulässige zeichen.")
-    }else{   
-        let response = sendPostRequest(username + "." + password, "createAccount");
-        if(response == "true"){
-            registerButton.setAttribute("disabled", "true");
-            alert("Account wurde erfolgreich erstellt.\nKehre zum Login zurück...")
-            window.location.href = "/"
+    }else{
+        if(username.includes("*")){
+            alert("Benutzername oder Passwort enthält unzulässige zeichen.") 
         }else{
-            alert(response)
+            let response = sendPostRequest(username + "." + password, "createAccount");
+            if(response == "true"){
+                registerButton.setAttribute("disabled", "true");
+                alert("Account wurde erfolgreich erstellt.\nKehre zum Login zurück...")
+                window.location.href = "/"
+            }else{
+                alert(response)
+            }
         }
     }
 }
-
 
 let registerButton = document.getElementById("registerButton");
 registerButton.addEventListener("click", register, false);
