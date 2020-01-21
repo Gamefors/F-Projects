@@ -1,8 +1,15 @@
 //TODO: normalize numbers either strings or ints 
-
 const bodyParser = require("body-parser");
 const express = require("express");
 const sqlite3 = require("sqlite3");
+
+const app = express();
+
+app.set("view engine", "pug");
+
+app.use(express.static(__dirname + "/public"));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 //#region sqlLite
 const db = new sqlite3.Database("./data/database.db", (err) => {
@@ -49,7 +56,18 @@ function createAccount(name, password){
         if (err) {
             console.error("[accountCreation]" + err.message);
         }else{
-            console.log("[INFO] created new account: Name: " + name + " Password: " + password)
+            console.log("[accountCreation] created new account: Name: " + name + " Password: " + password)
+        }
+    });
+}
+
+function deleteAccount(id){
+    let createAccountQuery = "DELETE FROM accounts WHERE id = '" + id + "'"
+    db.all(createAccountQuery, [], (err, rows) => {
+        if (err) {
+            console.error("[accountDeletion]" + err.message);
+        }else{
+            console.log("[accountDeletion] deleted account with id: " + id);
         }
     });
 }
@@ -142,11 +160,7 @@ fetchDatabase();
 
 //#endregion
 
-const app = express();
-app.set("view engine", "pug");
-app.use(express.static(__dirname + "/public"));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+//#region get
 
 app.get("/", (req, res) => {
   fetchDatabase();
@@ -172,6 +186,15 @@ app.get('/register', function (req, res) {
     fetchDatabase();
     res.render("register");
 });
+
+app.get('/adminPanel', function (req, res) {
+    fetchDatabase();
+    res.render("adminPanel");
+});
+
+//#endregion
+
+//#region post
 
 app.post("/login",function(req,res){
     fetchDatabase();
@@ -219,12 +242,12 @@ app.post("/getAccount",function(req,res){
             }
         });
         if(queriedAccount == undefined){
-            res.end("error");
+            res.end("ERROR");
         }else{
             res.end(queriedAccount.id + ";" + queriedAccount.name + ";" + queriedAccount.password + ";" + queriedAccount.rank + ";" + queriedAccount.money);
         }
     }else{
-        res.end("error");
+        res.end("ERROR");
     }
 });
 
@@ -244,7 +267,18 @@ app.post("/createAccount",function(req,res){
             }
         });
     }else{
-        res.end("[error] no data was given");
+        res.end("[ERROR] no data was given");
+    }
+});
+
+app.post("/deleteAccount",function(req,res){
+    fetchDatabase();
+    let data = req.body;
+    data = JSON.stringify(data).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2).split(";")[0];
+    if(data != ""){
+        deleteAccount(data);
+    }else{
+        res.end("[ERROR] no data was given");
     }
 });
 
@@ -261,15 +295,14 @@ app.post("/getAccountStats",function(req,res){
             }
         });
         if(queriedAccount == undefined){
-            res.end("error");
+            res.end("ERROR");
         }else{
             res.end(queriedAccount.wins + ";" + queriedAccount.moneyFromBets);
         }
     }else{
-        res.end("error");
+        res.end("ERROR");
     }
 });
-
 
 app.post("/getAccountByName",function(req,res){
     fetchDatabase();
@@ -289,7 +322,6 @@ app.post("/getAccountByName",function(req,res){
         res.end("error");
     }
 });
-
 
 app.post("/createBet",function(req,res){
     fetchDatabase();
@@ -429,8 +461,6 @@ app.post("/endBet",function(req,res){
     res.end(nearestParticipant.name + ";" + nearestParticipant.biddedMoney + ";" + nearestParticipant.delayTime);
 });
 
-
-
 app.post("/enterBet",function(req,res){
     fetchDatabase();
     let data = req.body;
@@ -481,7 +511,9 @@ app.post("/enterBet",function(req,res){
     res.end("")
 });
 
+//#endregion
+
 const server = app.listen(7000, () => {
     fetchDatabase();
-    console.log(`Express running → PORT ${server.address().port}`);
+    console.log("Started express server on port: " + server.address().port);
 });
