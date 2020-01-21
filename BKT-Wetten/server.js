@@ -45,7 +45,7 @@ function fetchDatabase(){
 
 function createAccount(name, password){
     let createAccountQuery = "INSERT INTO accounts(name,password,rank,money,wins,moneyFromBets) VALUES (?,?,?,?,?,?)"
-    db.all(createAccountQuery, [name, password, "user", "500", "0", "0"], (err, rows) => {
+    db.all(createAccountQuery, [name.toLowerCase(), password, "user", "500", "0", "0"], (err, rows) => {
         if (err) {
             console.error("[accountCreation]" + err.message);
         }else{
@@ -113,6 +113,20 @@ function addParticipantToBet(betId, accountId, biddedMoney, delayTime, callback)
     
     fetchDatabase();
 }
+
+function checkIfNameExists(name, callback){
+    let lowerCaseName = name.toLowerCase();
+    let checkIfNameExistsQuery = "SELECT * FROM accounts WHERE name = '" + lowerCaseName + "'"
+    db.all(checkIfNameExistsQuery, [], (err, rows) => {
+        if (err) {
+            console.error("[checkIfNameExists]" + err.message);
+        }else{
+            callback(rows);
+        }
+    });    
+    fetchDatabase();
+}
+
 
 function createBet(bet){
     createBetOnDatabase(bet.teacher, bet.startTime, bet.minBet, bet.moneyPool, bet.highestBet, bet.participants , function(rows){
@@ -220,10 +234,16 @@ app.post("/createAccount",function(req,res){
     if(data != ""){
         console.log(data);
         data = data.split(".");
-        createAccount(data[0], data[1]);
-        res.end("created account");
+        checkIfNameExists(data[0], function(result){
+            if(result.length == 0){
+                createAccount(data[0], data[1]);
+                res.end("true");
+            }else{
+                res.end("Ein Account mit diesem Namen existiert bereits.");
+            }
+        });
     }else{
-        res.end("error");
+        res.end("[error] no data was given");
     }
 });
 

@@ -1,5 +1,4 @@
 window.localStorage.clear();
-
 function sendPostRequest(data, type) {
     var xhttp = new XMLHttpRequest();
     xhttp.open("POST", "http://" + window.location.host + "/" + type, false);
@@ -8,15 +7,30 @@ function sendPostRequest(data, type) {
     return xhttp.responseText
 }
 
+function wait(ms){
+    let start = new Date().getTime();
+    let end = start;
+    while(end < start + ms) {
+      end = new Date().getTime();
+    }
+}
+
 function register(){
     let username = document.getElementById("registerUsernameEntry").value;
     let password = document.getElementById("registerPasswordEntry").value;
-    let info = document.getElementById("info");
-    info.innerText = "loging in..."
-    let response = sendPostRequest(username + "." + password, "createAccount");
-    info.innerText = response
     let registerButton = document.getElementById("registerButton");
-    registerButton.setAttribute("disabled", "true");
+    if(((username.includes("/") || username.includes(";")) || (username.includes(":") || username.includes("."))) || ((password.includes("/") || password.includes(";")) || (password.includes(":") || password.includes(".")))){
+        alert("Benutzername oder Passwort enthält unzulässige zeichen.")
+    }else{   
+        let response = sendPostRequest(username + "." + password, "createAccount");
+        if(response == "true"){
+            registerButton.setAttribute("disabled", "true");
+            alert("Account wurde erfolgreich erstellt.\nKehre zum Login zurück...")
+            window.location.href = "/"
+        }else{
+            alert(response)
+        }
+    }
 }
 
 
