@@ -228,16 +228,30 @@ function placeBet(betId){
     let yourBidP = document.getElementById("yourbidP" + betId)
     let howLateTimeP = document.getElementById("howLateTimeP" + betId)
     let submitButton = document.getElementById("submitButton" + betId)
-    let response = sendPostRequest(account.id + ";" + inputMoney.value,"checkBalance");
-    if(response == "true"){
-        div.removeChild(inputMoney);
-        div.removeChild(inputTime);
-        div.removeChild(yourBidP);
-        div.removeChild(howLateTimeP);
-        div.removeChild(submitButton);
-        sendPostRequest(betId + ";" + account.id + ";" + inputMoney.value + ";" + inputTime.value, "enterBet");
+    console.log(isNaN(inputMoney.value));
+    console.log(isNaN(inputTime.value));
+    if(inputMoney.value.includes(".") || inputTime.value.includes(",")){
+        alert("Bitte gebe keine Kommazahlen ein.");
     }else{
-        //TODO: show to user that he doesnt have enough money
+        if(isNaN(inputMoney.value) == false){
+            if(isNaN(inputTime.value) == false){
+                let response = sendPostRequest(account.id + ";" + inputMoney.value,"checkBalance");
+                if(response == "true"){
+                    div.removeChild(inputMoney);
+                    div.removeChild(inputTime);
+                    div.removeChild(yourBidP);
+                    div.removeChild(howLateTimeP);
+                    div.removeChild(submitButton);
+                    sendPostRequest(betId + ";" + account.id + ";" + inputMoney.value + ";" + inputTime.value, "enterBet");
+                }else{
+                    alert("Du hast nicht genug Geld.")
+                }
+                document.location.reload() 
+            }else{
+                alert("Bitte gebe nur Nummern ein.");
+            }
+        }else{
+            alert("Bitte gebe nur Nummern ein.");
+        }
     }
-    document.location.reload()
 }
