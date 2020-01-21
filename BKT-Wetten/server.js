@@ -130,7 +130,7 @@ function checkIfNameExists(name, callback){
 
 function createBet(bet){
     createBetOnDatabase(bet.teacher, bet.startTime, bet.minBet, bet.moneyPool, bet.highestBet, bet.participants , function(rows){
-        console.log("bet has been created.");
+        console.log("[betCreation] New bet with attributes: \n" + JSON.stringify(bet) + "\nhas been created.");
     });
     fetchDatabase();
 }
@@ -193,6 +193,7 @@ app.post("/login",function(req,res){
             if(account.name.toLowerCase() == username.toLowerCase()){
                 if(account.password == password){
                     res.end("logged in;" + account.id);
+                    console.log("[login] account with name: " + account.name + " logged in.");
                 }else{
                     res.end("incorrect password");
                 }
@@ -232,12 +233,12 @@ app.post("/createAccount",function(req,res){
     let data = req.body;
     data = JSON.stringify(data).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2).split(";")[0];
     if(data != ""){
-        console.log(data);
         data = data.split(".");
         checkIfNameExists(data[0], function(result){
             if(result.length == 0){
                 createAccount(data[0], data[1]);
                 res.end("true");
+                console.log("[accountCreation] New account with name: " + data[0] + " and password: " + data[1] + " created.")
             }else{
                 res.end("Ein Account mit diesem Namen existiert bereits.");
             }
