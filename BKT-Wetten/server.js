@@ -417,67 +417,80 @@ app.post("/endBet",function(req,res){
     console.log("[endBet] Participants:");
     participants.forEach(participant => {
         console.log("[endBet] " + participant.name + " mit " + participant.biddedMoney + "€ und " + participant.delayTime + " Minuten verspätung.")
-        
     });
-    console.log("[endBet] Currently winning participant: " + nearestParticipant.name);
-    
-    let today = new Date();
-    let time = today.getMinutes()
-    
-    let winners = []
-    
-    participants.forEach(participant => {
-        let currParticipantTimeDiff = parseInt(time) - parseInt(participant.delayTime)
-        let nearestParticipantTimeDiff = parseInt(time) - parseInt(nearestParticipant.delayTime) 
-        console.log("[winnerEvalutation] Current participant: " + participant.name + " mit " + participant.delayTime + " Minuten verspätung. Zeit Differentz: " + currParticipantTimeDiff)
-        console.log("[winnerEvalutation] Nearest/Winner participant: " + nearestParticipant.name + " mit " + nearestParticipant.delayTime + " Minuten verspätung. Zeit Differentz: " + nearestParticipantTimeDiff)
-        
-        if(currParticipantTimeDiff < nearestParticipantTimeDiff){
-            if(parseInt(time) <= 30){
-                nearestParticipant = participant
-                console.log("[endBet] New winning participant: " + nearestParticipant.name); 
+    if(nearestParticipant == undefined){
+        res.end("Keine Gewinner da keiner teilgenommen hat.")
+        db.all("DELETE FROM bets WHERE id = '" + queriedBet.id + "'", [], (err, rows) => {
+            if (err) {
+                console.error("[endBet/SqLite]" + err.message);
             }
-        }else if(currParticipantTimeDiff == nearestParticipantTimeDiff){
-            if(nearestParticipant != participant){
-                winners.push(participant);
-                console.log("[WinnerEvaluation] Added new winning participant because of same delayTime: " + participant.name);
+            else {
+                console.log("[endBet/SqLite] Deleted bet with id: " + queriedBet.id)
             }
-        }else{
-            if(parseInt(time) >= 30){
-                nearestParticipant = participant
-                console.log("[endBet] New winning participant: " + nearestParticipant.name); 
-            }
-        }
-    });
-    winners.push(nearestParticipant);
-    console.log("[endBet] Final winners:");
-    winners.forEach(participant => {
-        console.log("[endBet] " + participant.name + " mit " + participant.biddedMoney + "€ und " + participant.delayTime + " Minuten verspätung.")
-        
-    });
-    nearestParticipant = winners[Math.floor(Math.random() * winners.length)]
-    console.log("[endBet] Final winning participant: " + nearestParticipant.name);
-    let queriedAccount;
-    accounts.forEach(account => {
-        if(account.name.toLowerCase() == nearestParticipant.name.toLowerCase()){
-            queriedAccount = account
-        }
-    });
-    
-    updateAccountStats(queriedAccount.id, (parseInt(queriedAccount.wins) + 1).toString(), (parseInt(queriedAccount.moneyFromBets) + parseInt(queriedBet.moneyPool) * 2).toString());
-    
-    updateAccountMoney(queriedAccount.id, ((parseInt(queriedBet.moneyPool) * 2) + parseInt(queriedAccount.money)).toString());
+        });
+    }else{
 
-    db.all("DELETE FROM bets WHERE id = '" + queriedBet.id + "'", [], (err, rows) => {
-        if (err) {
-            console.error("[endBet/SqLite]" + err.message);
-        }
-        else {
-            console.log("[endBet/SqLite] Deleted bet with id: " + queriedBet.id)
-        }
-    });
-    res.end(nearestParticipant.name + ";" + nearestParticipant.biddedMoney + ";" + nearestParticipant.delayTime);
-});
+        
+        console.log("[endBet] Currently winning participant: " + nearestParticipant.name);
+        
+        let today = new Date();
+        let time = today.getMinutes()
+        
+        let winners = []
+        
+        participants.forEach(participant => {
+            let currParticipantTimeDiff = parseInt(time) - parseInt(participant.delayTime)
+            let nearestParticipantTimeDiff = parseInt(time) - parseInt(nearestParticipant.delayTime) 
+            console.log("[winnerEvalutation] Current participant: " + participant.name + " mit " + participant.delayTime + " Minuten verspätung. Zeit Differentz: " + currParticipantTimeDiff)
+            console.log("[winnerEvalutation] Nearest/Winner participant: " + nearestParticipant.name + " mit " + nearestParticipant.delayTime + " Minuten verspätung. Zeit Differentz: " + nearestParticipantTimeDiff)
+
+            if(currParticipantTimeDiff < nearestParticipantTimeDiff){
+                if(parseInt(time) <= 30){
+                    nearestParticipant = participant
+                    console.log("[endBet] New winning participant: " + nearestParticipant.name); 
+                }
+            }else if(currParticipantTimeDiff == nearestParticipantTimeDiff){
+                if(nearestParticipant != participant){
+                    winners.push(participant);
+                    console.log("[WinnerEvaluation] Added new winning participant because of same delayTime: " + participant.name);
+                }
+            }else{
+                if(parseInt(time) >= 30){
+                    nearestParticipant = participant
+                    console.log("[endBet] New winning participant: " + nearestParticipant.name); 
+                }
+            }
+        });
+        winners.push(nearestParticipant);
+        console.log("[endBet] Final winners:");
+        winners.forEach(participant => {
+            console.log("[endBet] " + participant.name + " mit " + participant.biddedMoney + "€ und " + participant.delayTime + " Minuten verspätung.")
+
+        });
+        nearestParticipant = winners[Math.floor(Math.random() * winners.length)]
+        console.log("[endBet] Final winning participant: " + nearestParticipant.name);
+        let queriedAccount;
+        accounts.forEach(account => {
+            if(account.name.toLowerCase() == nearestParticipant.name.toLowerCase()){
+                queriedAccount = account
+            }
+        });
+
+        updateAccountStats(queriedAccount.id, (parseInt(queriedAccount.wins) + 1).toString(), (parseInt(queriedAccount.moneyFromBets) + parseInt(queriedBet.moneyPool) * 2).toString());
+
+        updateAccountMoney(queriedAccount.id, ((parseInt(queriedBet.moneyPool) * 2) + parseInt(queriedAccount.money)).toString());
+
+        db.all("DELETE FROM bets WHERE id = '" + queriedBet.id + "'", [], (err, rows) => {
+            if (err) {
+                console.error("[endBet/SqLite]" + err.message);
+            }
+            else {
+                console.log("[endBet/SqLite] Deleted bet with id: " + queriedBet.id)
+            }
+        });
+        res.end(nearestParticipant.name + ";" + nearestParticipant.biddedMoney + ";" + nearestParticipant.delayTime);
+    }
+}); 
 
 app.post("/enterBet",function(req,res){
     fetchDatabase();

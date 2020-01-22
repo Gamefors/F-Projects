@@ -112,6 +112,7 @@ function createActiveBets(bets){
     
     
     bets.forEach(bet => {
+        let numbers = []
         let div = document.createElement("div");
         div.setAttribute("id", "betDiv" + bet.id);
         let name = document.createElement("p");
@@ -153,9 +154,7 @@ function createActiveBets(bets){
         howLateTimeInput.setAttribute("id", "howLateInput" + bet.id);
         submitButton.setAttribute("id", "submitButton" + bet.id);
         submitButton.innerText = "Wette abgeben."
-        submitButton.addEventListener("click", function(){
-            placeBet(bet.id);
-        }, false);
+        
         div.appendChild(name);
         div.appendChild(startTime_);
         //div.appendChild(highestBider);
@@ -166,22 +165,26 @@ function createActiveBets(bets){
             let accountNames = bet.participants;
             let notBettedYet = true
             accountNames = accountNames.split("/");
-            console.log(accountNames);
             accountNames.forEach(name => {
                 if(name != ""){
+                    
                     let account_ = getAccountByName(name);
                     let newName = name.split(":");
+                    numbers.push(newName[2]);
                     if(newName[0] == account.name){
                         notBettedYet = false
                     }
+                    
                     let participantname = document.createElement("p");
-                    participantname.innerText = "-" + account_.name + " mit " + newName[1] + "€" + " verspätung: " + newName[2]
+                    participantname.innerText = "-" + account_.name + " mit " + newName[1] + "€" + " verspätung: " + newName[2] + " Minuten."
                     participantsDiv.appendChild(participantname);
                 }
                 
             });
             
+            
             if(notBettedYet){
+              
                 div.appendChild(yourbidP);
                 div.appendChild(bedInput);
                 div.appendChild(howLateTimeP);
@@ -191,16 +194,33 @@ function createActiveBets(bets){
             }
             
         }else{
-            let participantname = document.createElement("p");
-            participantname.innerText = "-noch keine Teilnehmer"
-            participantsDiv.appendChild(participantname);
-            div.appendChild(yourbidP);
-            div.appendChild(bedInput);
-            div.appendChild(howLateTimeP);
-            div.appendChild(howLateTimeInput);
-            div.appendChild(spacer);
-            div.appendChild(submitButton); 
+                             
+            let today = new Date();
+            let currMins = today.getMinutes()
+            let currHours = today.getHours()
+            if(currMins >= bet.startTime.split(":")[1]){
+                howLateTimeP.innerText = "Es können keine Wetten mehr plaziert werden da die Stunde angefangen hatt."
+                div.appendChild(howLateTimeP);
+            }else{
+                if(currHours > bet.startTime.split(":")[0]){
+                    howLateTimeP.innerText = "Es können keine Wetten mehr plaziert werden da die Stunde angefangen hatt."
+                    div.appendChild(howLateTimeP);
+                }else{
+                    let participantname = document.createElement("p");
+                    participantname.innerText = "-noch keine Teilnehmer"
+                    participantsDiv.appendChild(participantname);
+                    div.appendChild(yourbidP);
+                    div.appendChild(bedInput);
+                    div.appendChild(howLateTimeP);
+                    div.appendChild(howLateTimeInput);
+                    div.appendChild(spacer);
+                    div.appendChild(submitButton);
+                }
+            }
         }
+        submitButton.addEventListener("click", function(){
+            placeBet(bet.id, numbers);
+        }, false);
         if(account.rank == "admin"){
             let endeBetButton = document.createElement("button");
             endeBetButton.innerText = "end bet"
@@ -221,37 +241,52 @@ function endBet(betId){
     document.location.reload();
 }
 
-function placeBet(betId){
+function placeBet(betId, numbers){
+    
+    
     let div = document.getElementById("betDiv" + betId);
     let inputMoney = document.getElementById("bedInput"+ betId)
     let inputTime = document.getElementById("howLateInput" + betId)
     let yourBidP = document.getElementById("yourbidP" + betId)
     let howLateTimeP = document.getElementById("howLateTimeP" + betId)
     let submitButton = document.getElementById("submitButton" + betId)
-    console.log(isNaN(inputMoney.value));
-    console.log(isNaN(inputTime.value));
-    if(inputMoney.value.includes(".") || inputTime.value.includes(",")){
+    if((inputMoney.value.includes(".") || inputMoney.value.includes(",")) || (inputTime.value.includes(".") || inputTime.value.includes(","))){
         alert("Bitte gebe keine Kommazahlen ein.");
     }else{
-        if(isNaN(inputMoney.value) == false){
-            if(isNaN(inputTime.value) == false){
-                let response = sendPostRequest(account.id + ";" + inputMoney.value,"checkBalance");
-                if(response == "true"){
-                    div.removeChild(inputMoney);
-                    div.removeChild(inputTime);
-                    div.removeChild(yourBidP);
-                    div.removeChild(howLateTimeP);
-                    div.removeChild(submitButton);
-                    sendPostRequest(betId + ";" + account.id + ";" + inputMoney.value + ";" + inputTime.value, "enterBet");
-                }else{
-                    alert("Du hast nicht genug Geld.")
-                }
-                document.location.reload() 
-            }else{
-                alert("Bitte gebe nur Nummern ein.");
-            }
+        if(inputMoney.value == "0" || inputTime.value == "0"){
+            alert("Du kannst nicht 0€ oder auf 0 Minuten wetten.")
         }else{
-            alert("Bitte gebe nur Nummern ein.");
+            if(inputMoney.value.includes("-") || inputTime.value.includes("-")){
+                alert("Du kannst keine minus Wette oder Verspätung platzieren.")
+            }else{
+                if(isNaN(inputMoney.value) == false || isNaN(inputTime.value) == false){
+                    if(parseInt(inputTime.value) > 60){
+                        alert("Du kannst nicht mehr als 60 Minuten verspätung angeben.")
+                    }else{
+                        if(numbers.includes(inputTime.value)){
+                            alert("DU kannst nicht die gleiche Verspätung wie andere Teilnehmer angeben.")
+                        }else{
+                            let response = sendPostRequest(account.id + ";" + inputMoney.value,"checkBalance");
+                            if(response == "true"){
+                                div.removeChild(inputMoney);
+                                div.removeChild(inputTime);
+                                div.removeChild(yourBidP);
+                                div.removeChild(howLateTimeP);
+                                div.removeChild(submitButton);
+                                sendPostRequest(betId + ";" + account.id + ";" + inputMoney.value + ";" + inputTime.value, "enterBet");
+                            }else{
+                                alert("Du hast nicht genug Geld.")
+                            }
+                            document.location.reload() 
+                        }
+                        
+                    }
+                    
+                }else{
+                    alert("Bitte gebe nur Nummern ein.");
+                }
+            }
         }
+        
     }
 }
