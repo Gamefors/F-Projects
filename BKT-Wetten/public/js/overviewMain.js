@@ -193,13 +193,26 @@ function createActiveBets(bets){
             
             
             if(notBettedYet){
-              
-                div.appendChild(yourbidP);
-                div.appendChild(bedInput);
-                div.appendChild(howLateTimeP);
-                div.appendChild(howLateTimeInput);
-                div.appendChild(spacer);
-                div.appendChild(submitButton);
+                let today = new Date();
+                let currMins = today.getMinutes()
+                let currHours = today.getHours()
+                if(currMins >= bet.startTime.split(":")[1]){
+                    howLateTimeP.innerText = "Es können keine Wetten mehr plaziert werden da die Stunde angefangen hatt."
+                    div.appendChild(howLateTimeP);
+                }else{
+                    if(currHours > bet.startTime.split(":")[0]){
+                        howLateTimeP.innerText = "Es können keine Wetten mehr plaziert werden da die Stunde angefangen hatt."
+                        div.appendChild(howLateTimeP);
+                    }else{
+                        div.appendChild(yourbidP);
+                        div.appendChild(bedInput);
+                        div.appendChild(howLateTimeP);
+                        div.appendChild(howLateTimeInput);
+                        div.appendChild(spacer);
+                        div.appendChild(submitButton);
+                    }
+                }
+                
             }
             
         }else{
