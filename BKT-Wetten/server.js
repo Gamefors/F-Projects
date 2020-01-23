@@ -61,6 +61,17 @@ function fetchDatabase(){
     });
 }
 
+function deleteBet(betId){
+    db.all("DELETE FROM bets WHERE id = '" + betId + "'", [], (err, rows) => {
+        if (err) {
+            console.error("[deleteBet/SqLite]" + err.message);
+        }
+        else {
+            console.log("[deleteBet/SqLite] Deleted bet with id: " + betId)
+        }
+    });
+}
+
 function createAccount(name, password){
     let createAccountQuery = "INSERT INTO accounts(name,password,rank,money,wins,moneyFromBets) VALUES (?,?,?,?,?,?)"
     db.all(createAccountQuery, [name.toLowerCase(), password, "user", "500", "0", "0"], (err, rows) => {
@@ -168,6 +179,110 @@ let accounts = [];
 let bets = [];
 
 fetchDatabase();
+
+//#endregion
+
+
+//#region extra functions 
+
+function evaluateBetWinner(participants, queriedBet, res){
+    if(participants.length == 1){
+        //setting the first one of the list because there is no other
+        let winner = participants[0];
+        //query the account of the winner
+        let queriedWinnerAccount;
+        accounts.forEach(account => {
+            if(account.name.toLowerCase() == winner.name.toLowerCase()){
+                queriedWinnerAccount = account
+            }
+        });
+       
+       
+        //update the account stats TODO: check if moneyFromBets works corectly (WINS do work corretly)
+        updateAccountStats(queriedWinnerAccount.id, (parseInt(queriedWinnerAccount.wins) + 1).toString(), ((parseInt(queriedBet.moneyPool) * 2) + parseInt(queriedWinnerAccount.moneyFromBets)).toString());
+        console.log("[DEBUG] " + (parseInt(queriedBet.moneyPool) * 2).toString() + " has been added to the winners stats as moneyFromBets.");
+        //add the price money to existing account money TODO: test why it sometimes is NaNd or why it doesnt work correctly
+        updateAccountMoney(queriedWinnerAccount.id, ((parseInt(queriedBet.moneyPool) * 2) + parseInt(queriedWinnerAccount.money)).toString());
+        console.log("[DEBUG] " + (parseInt(queriedBet.moneyPool) * 2).toString() + " has been added to the winners account.");
+        
+        
+        //delete bet from sqlite database
+        deleteBet(queriedBet.id);
+        //send winner back to website
+        res.end(queriedWinnerAccount.name + ";" + winner.biddedMoney + ";" + winner.delayTime); 
+    }else{
+        //getting the current time
+        let today = new Date();
+        let stoppedAtMinutes = parseInt(today.getMinutes())
+        let stoppedAtHours = today.getHours()
+        //get the lessonTime
+        let lessonStartTime = queriedBet.startTime.split(":");
+        let lessonStartTimeHours = lessonStartTime[0];
+        let lessonStartTimeMinutes = lessonStartTime[1];
+        //setting the first one of the list as the default winner if there are no other participants or noe one is closer to the delayTime
+        let winner = participants[0];
+//####################################################################################################################################################################################################
+        participants.forEach(participant => {
+            
+            let participantDelay = parseInt(participant.delayTime)
+            let winnerDelay = parseInt(winner.delayTime)
+
+            if((stoppedAtMinutes + participantDelay) > 60){
+                if((stoppedAtMinutes + winnerDelay) > 60){
+                    let participantNewDelayTimeInNewHour = (stoppedAtMinutes + participantDelay) - 60
+                    let winnerNewDelayTimeInNewHour = (stoppedAtMinutes + winnerDelay) - 60
+                    let participantTimeDifference = (stoppedAtMinutes - participantNewDelayTimeInNewHour)
+                    let winnerTimeDifference = (stoppedAtMinutes - winnerNewDelayTimeInNewHour)
+                    if(participantTimeDifference > winnerTimeDifference){
+                        console.log("[DEBUG] 1")
+                        winner = participant
+                    }
+                }
+            }else{
+                if((stoppedAtMinutes + winnerDelay) > 60){
+                    if((parseInt(stoppedAtMinutes) + parseInt(participantDelay)) > 60){
+                        let participantNewDelayTimeInNewHour = (stoppedAtMinutes + participantDelay) - 60
+                        let winnerNewDelayTimeInNewHour = (stoppedAtMinutes + winnerDelay) - 60
+                        let participantTimeDifference = (stoppedAtMinutes - participantNewDelayTimeInNewHour)
+                        let winnerTimeDifference = (stoppedAtMinutes - winnerNewDelayTimeInNewHour)
+                        if(participantTimeDifference > winnerTimeDifference){
+                            console.log("[DEBUG] 2")
+                            winner = participant
+                        }
+                    }else{
+                        console.log("[DEBUG] 3")
+                        winner = participant
+                    }
+                }else{
+                    let participantTimeDifference = (stoppedAtMinutes - participantDelay)
+                    let winnerTimeDifference = (stoppedAtMinutes - winnerDelay)
+                    if(participantTimeDifference > winnerTimeDifference){
+                        console.log("[DEBUG] 4")
+                        winner = participant
+                    }
+                }
+            }
+        });
+//####################################################################################################################################################################################################
+        //query the account of the winner
+        let queriedWinnerAccount;
+        accounts.forEach(account => {
+            if(account.name.toLowerCase() == winner.name.toLowerCase()){
+                queriedWinnerAccount = account
+            }
+        });
+        //update the account stats TODO: check if moneyFromBets works corectly (WINS do work corretly)
+        updateAccountStats(queriedWinnerAccount.id, (parseInt(queriedWinnerAccount.wins) + 1).toString(), (parseInt(queriedWinnerAccount.moneyFromBets) + parseInt(queriedBet.moneyPool) * 2).toString());
+        console.log("[DEBUG] " + (parseInt(queriedWinnerAccount.moneyFromBets) + parseInt(queriedBet.moneyPool) * 2).toString() + " has been added to the winners stats as moneyFromBets.");
+        //add the price money to existing account money TODO: test why it sometimes is NaNd or why it doesnt work correctly
+        updateAccountMoney(queriedWinnerAccount.id, ((parseInt(queriedBet.moneyPool) * 2) + parseInt(queriedWinnerAccount.money)).toString());
+        console.log("[DEBUG] " + (parseInt(queriedWinnerAccount.moneyFromBets) + parseInt(queriedBet.moneyPool) * 2).toString() + " has been added to the winners account.");
+        //delete bet from sqlite database
+        deleteBet(queriedBet.id);
+        //send winner back to website
+        res.end(queriedWinnerAccount.name + ";" + winner.biddedMoney + ";" + winner.delayTime); 
+        }
+}
 
 //#endregion
 
@@ -396,99 +511,39 @@ app.post("/checkBalance",function(req,res){
 });
 
 app.post("/endBet",function(req,res){
-    let data = JSON.stringify(req.body).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2).split(";")[0]; 
-    let queriedBet;
+    //getting Id of the bet that should end
+    let idOfEndingBet = JSON.stringify(req.body).replace("}", "").replace("{", "").replace('"', "").replace('""', "").slice(0, -2).split(";")[0]
+    let queriedBet = "no bet was queried";
     bets.forEach(bet => {
-        if(bet.id == data)[
+        if(bet.id == idOfEndingBet){
             queriedBet = bet
-        ]
+        }
     });
-    let participants = queriedBet.participants.split("/")
+    console.log("[endBet] Beende Wette mit der Id: " + queriedBet.id);
+    //get the participants of the bet that should end
+    let participants = queriedBet.participants.split("/");
     participants.shift();
-    let tempParticipants = []
+    //creating a participant object and replace old list with these new participant objects
+    let tempList = []
     participants.forEach(participant => {
         participant = participant.split(":");
         let tempParticipant = {name:participant[0], biddedMoney:participant[1], delayTime:participant[2]}
-        tempParticipants.push(tempParticipant)
+        tempList.push(tempParticipant)
     });
-    participants = tempParticipants
-    let nearestParticipant = participants[0];
-    console.log("[endBet] Ending bet with id: " + queriedBet.id);
-    console.log("[endBet] Participants:");
-    participants.forEach(participant => {
-        console.log("[endBet] " + participant.name + " mit " + participant.biddedMoney + "€ und " + participant.delayTime + " Minuten verspätung.")
-    });
-    if(nearestParticipant == undefined){
-        res.end("Keine Gewinner da keiner teilgenommen hat.")
-        db.all("DELETE FROM bets WHERE id = '" + queriedBet.id + "'", [], (err, rows) => {
-            if (err) {
-                console.error("[endBet/SqLite]" + err.message);
-            }
-            else {
-                console.log("[endBet/SqLite] Deleted bet with id: " + queriedBet.id)
-            }
-        });
+    participants = tempList
+    //check if there are participants to check for a winner
+    if(participants.length == 0){
+        res.end("[endBet] Kein Gewinner da niemand teilgenommen hat.")
+        //delete bet from sqlite database
+        deleteBet(queriedBet.id);
     }else{
-
-        
-        console.log("[endBet] Currently winning participant: " + nearestParticipant.name);
-        
-        let today = new Date();
-        let time = today.getMinutes()
-        
-        let winners = []
-        
+        //displaying potential winners for debbuging reasons
+        console.log("[endBet] Potenzielle Gewinner:");
         participants.forEach(participant => {
-            let currParticipantTimeDiff = parseInt(time) - parseInt(participant.delayTime)
-            let nearestParticipantTimeDiff = parseInt(time) - parseInt(nearestParticipant.delayTime) 
-            console.log("[winnerEvalutation] Current participant: " + participant.name + " mit " + participant.delayTime + " Minuten verspätung. Zeit Differentz: " + currParticipantTimeDiff)
-            console.log("[winnerEvalutation] Nearest/Winner participant: " + nearestParticipant.name + " mit " + nearestParticipant.delayTime + " Minuten verspätung. Zeit Differentz: " + nearestParticipantTimeDiff)
-
-            if(currParticipantTimeDiff < nearestParticipantTimeDiff){
-                if(parseInt(time) <= 30){
-                    nearestParticipant = participant
-                    console.log("[endBet] New winning participant: " + nearestParticipant.name); 
-                }
-            }else if(currParticipantTimeDiff == nearestParticipantTimeDiff){
-                if(nearestParticipant != participant){
-                    winners.push(participant);
-                    console.log("[WinnerEvaluation] Added new winning participant because of same delayTime: " + participant.name);
-                }
-            }else{
-                if(parseInt(time) >= 30){
-                    nearestParticipant = participant
-                    console.log("[endBet] New winning participant: " + nearestParticipant.name); 
-                }
-            }
-        });
-        winners.push(nearestParticipant);
-        console.log("[endBet] Final winners:");
-        winners.forEach(participant => {
             console.log("[endBet] " + participant.name + " mit " + participant.biddedMoney + "€ und " + participant.delayTime + " Minuten verspätung.")
-
         });
-        nearestParticipant = winners[Math.floor(Math.random() * winners.length)]
-        console.log("[endBet] Final winning participant: " + nearestParticipant.name);
-        let queriedAccount;
-        accounts.forEach(account => {
-            if(account.name.toLowerCase() == nearestParticipant.name.toLowerCase()){
-                queriedAccount = account
-            }
-        });
-
-        updateAccountStats(queriedAccount.id, (parseInt(queriedAccount.wins) + 1).toString(), (parseInt(queriedAccount.moneyFromBets) + parseInt(queriedBet.moneyPool) * 2).toString());
-
-        updateAccountMoney(queriedAccount.id, ((parseInt(queriedBet.moneyPool) * 2) + parseInt(queriedAccount.money)).toString());
-
-        db.all("DELETE FROM bets WHERE id = '" + queriedBet.id + "'", [], (err, rows) => {
-            if (err) {
-                console.error("[endBet/SqLite]" + err.message);
-            }
-            else {
-                console.log("[endBet/SqLite] Deleted bet with id: " + queriedBet.id)
-            }
-        });
-        res.end(nearestParticipant.name + ";" + nearestParticipant.biddedMoney + ";" + nearestParticipant.delayTime);
+        //pass evaluation of winner to a function
+        evaluateBetWinner(participants, queriedBet, res);
     }
 }); 
 

@@ -83,12 +83,21 @@ function gotoCreateBet(){
     window.location.href = "/createBet"
 }
 
+function gotoAdminPanel(){
+    window.location.href = "/adminPanel"
+}
+
 if(account.rank == "admin"){
     let createBetButton = document.createElement("button");
     createBetButton.innerText = "Neue Wette erstellen"
     let profileSection = document.getElementById("profile");
     createBetButton.addEventListener("click", gotoCreateBet, false);
     profileSection.appendChild(createBetButton);
+    let gotoAdminPanelButton = document.createElement("button");
+    gotoAdminPanelButton.innerText = "Admin Panel"
+    gotoAdminPanelButton.addEventListener("click", gotoAdminPanel, false);
+    profileSection.appendChild(document.createElement("p"));
+    profileSection.appendChild(gotoAdminPanelButton);
 }
 
 createActiveBets(bets)
@@ -266,18 +275,23 @@ function placeBet(betId, numbers){
                         if(numbers.includes(inputTime.value)){
                             alert("DU kannst nicht die gleiche Verspätung wie andere Teilnehmer angeben.")
                         }else{
-                            let response = sendPostRequest(account.id + ";" + inputMoney.value,"checkBalance");
-                            if(response == "true"){
-                                div.removeChild(inputMoney);
-                                div.removeChild(inputTime);
-                                div.removeChild(yourBidP);
-                                div.removeChild(howLateTimeP);
-                                div.removeChild(submitButton);
-                                sendPostRequest(betId + ";" + account.id + ";" + inputMoney.value + ";" + inputTime.value, "enterBet");
+                            if(inputMoney.value == "" || inputTime.value == ""){
+                                alert("es fehlt die angaben für den einsatz oder die verspätung.")
                             }else{
-                                alert("Du hast nicht genug Geld.")
+                                let response = sendPostRequest(account.id + ";" + inputMoney.value,"checkBalance");
+                                if(response == "true"){
+                                    div.removeChild(inputMoney);
+                                    div.removeChild(inputTime);
+                                    div.removeChild(yourBidP);
+                                    div.removeChild(howLateTimeP);
+                                    div.removeChild(submitButton);
+                                    sendPostRequest(betId + ";" + account.id + ";" + inputMoney.value + ";" + inputTime.value, "enterBet");
+                                }else{
+                                    alert("Du hast nicht genug Geld.")
+                                }
+                                document.location.reload() 
                             }
-                            document.location.reload() 
+                            
                         }
                         
                     }
