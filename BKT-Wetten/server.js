@@ -234,7 +234,7 @@ function evaluateBetWinner(participants, queriedBet, res){
                     let participantTimeDifference = (stoppedAtMinutes - participantNewDelayTimeInNewHour)
                     let winnerTimeDifference = (stoppedAtMinutes - winnerNewDelayTimeInNewHour)
                     if(participantTimeDifference > winnerTimeDifference){
-                        console.log("[DEBUG] 1")
+                        console.log("[DEBUG] 1 old Winner = " + winner + " new Winner: " + participant)
                         winner = participant
                     }
                 }
@@ -246,18 +246,18 @@ function evaluateBetWinner(participants, queriedBet, res){
                         let participantTimeDifference = (stoppedAtMinutes - participantNewDelayTimeInNewHour)
                         let winnerTimeDifference = (stoppedAtMinutes - winnerNewDelayTimeInNewHour)
                         if(participantTimeDifference > winnerTimeDifference){
-                            console.log("[DEBUG] 2")
+                            console.log("[DEBUG] 2 old Winner = " + winner + " new Winner: " + participant)
                             winner = participant
                         }
                     }else{
-                        console.log("[DEBUG] 3")
+                        console.log("[DEBUG] 3 old Winner = " + winner + " new Winner: " + participant)
                         winner = participant
                     }
                 }else{
                     let participantTimeDifference = (stoppedAtMinutes - participantDelay)
                     let winnerTimeDifference = (stoppedAtMinutes - winnerDelay)
                     if(participantTimeDifference > winnerTimeDifference){
-                        console.log("[DEBUG] 4")
+                        console.log("[DEBUG] 4 old Winner = " + winner + " new Winner: " + participant)
                         winner = participant
                     }
                 }
@@ -277,6 +277,9 @@ function evaluateBetWinner(participants, queriedBet, res){
         //add the price money to existing account money TODO: test why it sometimes is NaNd or why it doesnt work correctly
         updateAccountMoney(queriedWinnerAccount.id, ((parseInt(queriedBet.moneyPool) * 2) + parseInt(queriedWinnerAccount.money)).toString());
         console.log("[DEBUG] " + (parseInt(queriedWinnerAccount.moneyFromBets) + parseInt(queriedBet.moneyPool) * 2).toString() + " has been added to the winners account.");
+        
+        console.log("[DEBUG] winner is " + queriedWinnerAccount.name + " mit " + winner.delayTime + " Minuten verspätung.");
+        
         //delete bet from sqlite database
         deleteBet(queriedBet.id);
         //send winner back to website
