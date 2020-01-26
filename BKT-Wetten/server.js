@@ -559,45 +559,64 @@ app.post("/enterBet",function(req,res){
     let accountId = data[1]
     let biddedMoney = data[2]
     let delayTime = data[3]
+    
+    let queriedBet = "no bet was queried";
+    bets.forEach(bet => {
+        if(bet.id == betId){
+            queriedBet = bet
+        }
+    });
+    let numbers = [];
+    let participants = queriedBet.participants.split("/");
+    participants.shift();
+    participants.forEach(participant => {
+        participant = participant.split(":");
+        numbers.push(participant[2])
+    });
+    
+    //FIXME: Test this
+    if(numbers.includes(delayTime)){
+        res.end("false");
+    }else{
+        addParticipantToBet(betId, accountId, biddedMoney, delayTime, function(bet_){
+            fetchDatabase();
+            let bet = bet_[0]
+            let queriedAccount;
+            accounts.forEach(account => {
+                if(account.id == accountId){
+                    queriedAccount = account
+                }
+            });
+            let newMoneyPool = (parseInt(bet.moneyPool) + parseInt(biddedMoney)).toString();
+            let newParticipants = bet.participants + "/" + queriedAccount.name + ":" + biddedMoney + ":" + delayTime;
+            let newHighestBet = "error:error";
+            let newParticipantsList = newParticipants.split(";");
+            newParticipantsList.forEach(participant => {
+                let newHighestBetInt = parseInt(newHighestBet.split(":")[1]);
+                participant = participant.split(":");
+                    if(newHighestBetInt < parseInt(participant[1])){
+                        newHighestBet = participant[0] + " mit " + participant[1]
+                    }
+            });
+            fetchDatabase();
+            let addParticipantToBetQuery = "UPDATE bets SET 'moneyPool' = '" + newMoneyPool + "', 'highestBet' = '" + newHighestBet + "', 'participants' = '" + newParticipants + "' WHERE id = '" + betId + "'"
+            db.all(addParticipantToBetQuery, [], (err, rows) => {
+                if (err) {
+                    console.error("[addParticipantToBetCallback]" + err.message);
+                }else{
 
-    addParticipantToBet(betId, accountId, biddedMoney, delayTime, function(bet_){
-        fetchDatabase();
-        let bet = bet_[0]
+                }
+            });
+        });
         let queriedAccount;
         accounts.forEach(account => {
             if(account.id == accountId){
                 queriedAccount = account
             }
         });
-        let newMoneyPool = (parseInt(bet.moneyPool) + parseInt(biddedMoney)).toString();
-        let newParticipants = bet.participants + "/" + queriedAccount.name + ":" + biddedMoney + ":" + delayTime;
-        let newHighestBet = "error:error";
-        let newParticipantsList = newParticipants.split(";");
-        newParticipantsList.forEach(participant => {
-            let newHighestBetInt = parseInt(newHighestBet.split(":")[1]);
-            participant = participant.split(":");
-                if(newHighestBetInt < parseInt(participant[1])){
-                    newHighestBet = participant[0] + " mit " + participant[1]
-                }
-        });
-        fetchDatabase();
-        let addParticipantToBetQuery = "UPDATE bets SET 'moneyPool' = '" + newMoneyPool + "', 'highestBet' = '" + newHighestBet + "', 'participants' = '" + newParticipants + "' WHERE id = '" + betId + "'"
-        db.all(addParticipantToBetQuery, [], (err, rows) => {
-            if (err) {
-                console.error("[addParticipantToBetCallback]" + err.message);
-            }else{
-                
-            }
-        });
-    });
-    let queriedAccount;
-    accounts.forEach(account => {
-        if(account.id == accountId){
-            queriedAccount = account
-        }
-    });
-    updateAccountMoney(queriedAccount.id, (parseInt(queriedAccount.money) - parseInt(biddedMoney)).toString());
-    res.end("")
+        updateAccountMoney(queriedAccount.id, (parseInt(queriedAccount.money) - parseInt(biddedMoney)).toString());
+        res.end("")
+    }
 });
 
 //#endregion

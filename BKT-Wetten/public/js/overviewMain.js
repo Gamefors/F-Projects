@@ -286,7 +286,7 @@ function placeBet(betId, numbers){
 						alert("Du kannst nicht mehr als 60 Minuten verspätung angeben.")
 					}else{
 						if(numbers.includes(inputTime.value)){
-							alert("DU kannst nicht die gleiche Verspätung wie andere Teilnehmer angeben.")
+							alert("Du kannst nicht die gleiche Verspätung wie andere Teilnehmer angeben.")
 						}else{
 							if(inputMoney.value == "" || inputTime.value == ""){
 								alert("es fehlt die angaben für den einsatz oder die verspätung.")
@@ -298,7 +298,11 @@ function placeBet(betId, numbers){
 									div.removeChild(yourBidP);
 									div.removeChild(howLateTimeP);
 									div.removeChild(submitButton);
-									sendPostRequest(betId + ";" + account.id + ";" + inputMoney.value + ";" + inputTime.value, "enterBet");
+									let response = sendPostRequest(betId + ";" + account.id + ";" + inputMoney.value + ";" + inputTime.value, "enterBet");
+									if(response == "false"){
+										alert("Du kannst nicht die gleiche Verspätung wie andere Teilnehmer angeben.")
+										return ""
+									}
 								}else{
 									alert("Du hast nicht genug Geld.")
 								}
