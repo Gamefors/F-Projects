@@ -1,11 +1,3 @@
-let loggedIn = window.localStorage.getItem("loggedIn");
-let accountId = window.localStorage.getItem("accountId");
-
-if(loggedIn == null){
-	alert("you are not logged in.")
-	localStorage.clear();
-	window.location.href = "/"
-}
 
 function sendPostRequest(data, type) {
 	var xhttp = new XMLHttpRequest();
@@ -18,6 +10,24 @@ function sendPostRequest(data, type) {
 function logout(){
 	localStorage.clear();
 	window.location.href = "/"
+}
+
+function endBet(betId){
+	let response = sendPostRequest(betId,"endBet").split(";");
+	alert(response[0] + " hat mit " + response[2] + " Minuten verspätung und " + response[1] + "€ Einsatz gewonnen.");
+	document.location.reload();
+}
+
+function gotoStats(){
+	window.location.href = "/stats"
+}
+
+function gotoCreateBet(){
+	window.location.href = "/createBet"
+}
+
+function gotoAdminPanel(){
+	window.location.href = "/adminPanel"
 }
 
 function getBets(){
@@ -40,7 +50,7 @@ function getBets(){
 	}
 }
 
-function refreshBets(){
+function refreshBets(){//TODO: remove later when reload is issued by server everytime a user enters the bet or it ends.
 	document.location.reload()
 }
 
@@ -61,204 +71,6 @@ function getAccountByName(accountName){
 	response = response.split(";");
 	return {id:response[0], name:response[1], password:response[2], rank:response[3], money:response[4]};
 } 
-
-let logoutProfileButton = document.getElementById("logoutProfileButton");
-logoutProfileButton.addEventListener("click", logout, false);
-
-let refreshBetsButton = document.getElementById("refreshBetsButton");
-refreshBetsButton.addEventListener("click", refreshBets, false);
-
-let statsButton = document.getElementById("statsButton");
-statsButton.addEventListener("click", gotoStats, false);
-
-function gotoStats(){
-	window.location.href = "/stats"
-}
-
-function endBet(betId){
-	let response = sendPostRequest(betId,"endBet").split(";");
-	alert(response[0] + " hat mit " + response[2] + " Minuten verspätung und " + response[1] + "€ Einsatz gewonnen.");
-	document.location.reload();
-}
-
-let account = getAccount(accountId);
-let bets;
-bets = getBets();
-
-document.getElementById("overviewProfileId").innerText = "Id: " + account.id
-document.getElementById("overviewProfileName").innerText = "Name: " + account.name
-document.getElementById("overviewProfileRank").innerText = "Rang: " + account.rank
-document.getElementById("overviewProfileMoney").innerText = "Geld: " + account.money + "€"
-
-function gotoCreateBet(){
-	window.location.href = "/createBet"
-}
-
-function gotoAdminPanel(){
-	window.location.href = "/adminPanel"
-}
-
-if(account.rank == "admin"){
-	let createBetButton = document.createElement("button");
-	createBetButton.innerText = "Neue Wette erstellen"
-	let profileSection = document.getElementById("profile");
-	createBetButton.addEventListener("click", gotoCreateBet, false);
-	profileSection.appendChild(createBetButton);
-	let gotoAdminPanelButton = document.createElement("button");
-	gotoAdminPanelButton.innerText = "Admin Panel"
-	gotoAdminPanelButton.addEventListener("click", gotoAdminPanel, false);
-	profileSection.appendChild(document.createElement("p"));
-	profileSection.appendChild(gotoAdminPanelButton);
-}
-
-createActiveBets(bets)
-
-function createActiveBets(bets){
-
-	let activeBetsSectionNew = document.createElement("section");
-	let activeBetsSection = document.getElementById("activeBets");
-	let h1 = document.createElement("h1");
-	
-	h1.innerText = "Aktive Wetten"
-	activeBetsSectionNew.setAttribute("id", "activeBets")
-	
-	document.body.removeChild(activeBetsSection);
-	document.body.appendChild(activeBetsSectionNew);
-	activeBetsSectionNew.appendChild(h1)
-	
-	bets.forEach(bet => {
-		let div = document.createElement("div");
-		let name = document.createElement("p");
-		let startTime_ = document.createElement("p");
-		let minBet_ = document.createElement("p");
-		let highestBider = document.createElement("p");
-		let participantsP = document.createElement("p");
-		let participantsDiv = document.createElement("p");
-		let yourbidP = document.createElement("p");
-		let bedInput = document.createElement("input");
-		let howLateTimeP = document.createElement("p");
-		let howLateTimeInput = document.createElement("input");
-		let spacer = document.createElement("p");
-		let submitButton = document.createElement("button");
-		let spacer2 = document.createElement("p");
-		
-		spacer2.innerText = ""
-		div.setAttribute("id", "betDiv" + bet.id);
-		name.innerText = "Lehrer Name: " + bet.teacher
-		startTime_.innerText = "Unterrichtsstunde startet um: " + bet.startTime
-		minBet_.innerText = "minimal Einsatz ist: " + bet.minBet + "€"
-		if(bet.participants == ""){
-			highestBider.innerText = "Höchstbietender: niemand"
-		}else{
-			
-			let accountIds = bet.participants.substring(1);
-			accountIds = accountIds.split("_");
-			accountIds.forEach(id => {
-			   // let account = getAccountWithId(id)
-				//TODO: do it here
-			});
-		}
-		
-		
-		yourbidP.innerText = "Deine Wette(nur Zahl): "
-		yourbidP.setAttribute("id", "yourbidP" + bet.id);
-		bedInput.setAttribute("id", "bedInput" + bet.id);
-		howLateTimeP.innerText = "Wie viel verspätung (in minuten):"
-		howLateTimeP.setAttribute("id", "howLateTimeP" + bet.id);
-		howLateTimeInput.setAttribute("id", "howLateInput" + bet.id);
-		submitButton.setAttribute("id", "submitButton" + bet.id);
-		submitButton.innerText = "Wette abgeben."
-		
-		div.appendChild(name);
-		div.appendChild(startTime_);
-		//div.appendChild(highestBider);
-		div.appendChild(participantsP);
-		div.appendChild(participantsDiv);
-		participantsP.innerText = "Teilnehmer: "
-		if(bet.participants != ""){
-			let accountNames = bet.participants;
-			let notBettedYet = true
-			accountNames = accountNames.split("/");
-			accountNames.forEach(name => {
-				if(name != ""){
-					
-					let account_ = getAccountByName(name);
-					let newName = name.split(":");
-					if(newName[0] == account.name){
-						notBettedYet = false
-					}
-					
-					let participantname = document.createElement("p");
-					participantname.innerText = "-" + account_.name + " mit " + newName[1] + "€" + " verspätung: " + newName[2] + " Minuten."
-					participantsDiv.appendChild(participantname);
-				}
-				
-			});
-			
-			
-			if(notBettedYet){
-				let today = new Date();
-				let currMins = today.getMinutes()
-				let currHours = today.getHours()
-				if(currMins >= bet.startTime.split(":")[1]){
-					howLateTimeP.innerText = "Es können keine Wetten mehr plaziert werden da die Stunde angefangen hatt."
-					div.appendChild(howLateTimeP);
-				}else{
-					if(currHours > bet.startTime.split(":")[0]){
-						howLateTimeP.innerText = "Es können keine Wetten mehr plaziert werden da die Stunde angefangen hatt."
-						div.appendChild(howLateTimeP);
-					}else{
-						div.appendChild(yourbidP);
-						div.appendChild(bedInput);
-						div.appendChild(howLateTimeP);
-						div.appendChild(howLateTimeInput);
-						div.appendChild(spacer);
-						div.appendChild(submitButton);
-					}
-				}
-				
-			}
-			
-		}else{
-							 
-			let today = new Date();
-			let currMins = today.getMinutes()
-			let currHours = today.getHours()
-			if(currMins >= bet.startTime.split(":")[1]){
-				howLateTimeP.innerText = "Es können keine Wetten mehr plaziert werden da die Stunde angefangen hatt."
-				div.appendChild(howLateTimeP);
-			}else{
-				if(currHours > bet.startTime.split(":")[0]){
-					howLateTimeP.innerText = "Es können keine Wetten mehr plaziert werden da die Stunde angefangen hatt."
-					div.appendChild(howLateTimeP);
-				}else{
-					let participantname = document.createElement("p");
-					participantname.innerText = "-noch keine Teilnehmer"
-					participantsDiv.appendChild(participantname);
-					div.appendChild(yourbidP);
-					div.appendChild(bedInput);
-					div.appendChild(howLateTimeP);
-					div.appendChild(howLateTimeInput);
-					div.appendChild(spacer);
-					div.appendChild(submitButton);
-				}
-			}
-		}
-		submitButton.addEventListener("click", function(){
-			placeBet(bet.id);
-		}, false);
-		if(account.rank == "admin"){
-			let endeBetButton = document.createElement("button");
-			endeBetButton.innerText = "end bet"
-			endeBetButton.addEventListener("click", function(){
-				endBet(bet.id);
-			}, false);
-			div.appendChild(endeBetButton);
-		}
-		div.appendChild(spacer2);
-		activeBetsSectionNew.appendChild(div);
-	});
-}
 
 function placeBet(betId){
 	let inputMoney = parseInt(document.getElementById("bedInput"+ betId).value)
@@ -308,4 +120,165 @@ function placeBet(betId){
 			}
 		}
 	}
+}
+
+function createActiveBets(bets){
+	let activeBetsSectionNew = document.createElement("section");
+	let activeBetsSection = document.getElementById("activeBets");
+	let h1 = document.createElement("h1");
+	h1.innerText = "Aktive Wetten"
+	activeBetsSectionNew.setAttribute("id", "activeBets")
+	document.body.removeChild(activeBetsSection);
+	document.body.appendChild(activeBetsSectionNew);
+	activeBetsSectionNew.appendChild(h1)
+	
+	bets.forEach(bet => {
+		let participants = []
+		let tempList = bet.participants.split("/");
+		tempList.shift();
+		tempList.forEach(tempParticipant => {
+			tempParticipant = tempParticipant.split(":");
+			participants.push({name:tempParticipant[0], biddedMoney:tempParticipant[1], delayTime:tempParticipant[2]});
+		});
+		let div = document.createElement("div");
+		let teacherName = document.createElement("p");
+		let startTime = document.createElement("p");
+		let participantsP = document.createElement("p");
+		let participantListDiv = document.createElement("p");
+		let yourbidP = document.createElement("p");
+		let bedInput = document.createElement("input");
+		let howLateTimeP = document.createElement("p");
+		let howLateTimeInput = document.createElement("input");
+		let spacer = document.createElement("p");
+		let submitButton = document.createElement("button");
+		div.setAttribute("id", "betDiv" + bet.id);
+		yourbidP.setAttribute("id", "yourbidP" + bet.id);
+		bedInput.setAttribute("id", "bedInput" + bet.id);
+		howLateTimeP.setAttribute("id", "howLateTimeP" + bet.id);
+		howLateTimeInput.setAttribute("id", "howLateInput" + bet.id);
+		submitButton.setAttribute("id", "submitButton" + bet.id);
+		
+		teacherName.innerText = "Lehrer Name: " + bet.teacher
+		startTime.innerText = "Unterrichtsstunde startet um: " + bet.startTime
+		participantsP.innerText = "Teilnehmer: "
+		submitButton.innerText = "Wette abgeben."
+		howLateTimeP.innerText = "Verspätung in Minuten:"
+		yourbidP.innerText = "Einsatz in €: "
+		
+		div.appendChild(teacherName);
+		div.appendChild(startTime);
+		div.appendChild(participantsP);
+		div.appendChild(participantListDiv);
+
+		let today = new Date();
+		let currMins = parseInt(today.getMinutes())
+		let currHours = parseInt(today.getHours())
+		let betMins = parseInt(bet.startTime.split(":")[1])
+		let betHours = parseInt(bet.startTime.split(":")[0])
+
+		if(participants.length > 0){
+			let placedBet = false
+			participants.forEach(participant => {
+				if(participant.name.toLowerCase() == account.name.toLowerCase()){
+					placedBet = true
+				}
+				let participantname = document.createElement("p");
+				participantname.innerText = "• " + participant.name + " mit " + participant.biddedMoney + "€" + " verspätung: " + participant.delayTime + " Minuten."
+				participantListDiv.appendChild(participantname);
+			});
+			if(placedBet == false){
+				if(currHours <= betHours){
+					if(currMins <= betMins){
+						div.appendChild(yourbidP);
+						div.appendChild(bedInput);
+						div.appendChild(howLateTimeP);
+						div.appendChild(howLateTimeInput);
+						div.appendChild(spacer);
+						div.appendChild(submitButton);
+					}else{
+						howLateTimeP.innerText = "Es können keine Wetten mehr plaziert werden da die Stunde angefangen hatt."
+						div.appendChild(howLateTimeP);
+					}
+				}else{
+					howLateTimeP.innerText = "Es können keine Wetten mehr plaziert werden da die Stunde angefangen hatt."
+					div.appendChild(howLateTimeP);
+				}
+			}else{
+				howLateTimeP.innerText = "Die Wette wurde geschlossen."
+				div.appendChild(howLateTimeP);
+			}
+		}else{
+			if(currHours <= betHours){
+				if(currMins <= betMins){
+					div.appendChild(yourbidP);
+					div.appendChild(bedInput);
+					div.appendChild(howLateTimeP);
+					div.appendChild(howLateTimeInput);
+					div.appendChild(spacer);
+					div.appendChild(submitButton);
+				}else{
+					howLateTimeP.innerText = "Es können keine Wetten mehr plaziert werden da die Stunde angefangen hatt."
+					div.appendChild(howLateTimeP);
+				}
+			}else{
+				howLateTimeP.innerText = "Es können keine Wetten mehr plaziert werden da die Stunde angefangen hatt."
+				div.appendChild(howLateTimeP);
+			}
+		}
+
+
+///////////////////////////////////////////////////////////////
+		submitButton.addEventListener("click", function(){
+			placeBet(bet.id);
+		}, false);
+		if(account.rank == "admin"){
+			let endeBetButton = document.createElement("button");
+			endeBetButton.innerText = "end bet"
+			endeBetButton.addEventListener("click", function(){
+				endBet(bet.id);
+			}, false);
+			let spacer2 = document.createElement("p");
+			div.appendChild(spacer2);
+			div.appendChild(endeBetButton);
+		}
+		activeBetsSectionNew.appendChild(div);
+	});
+}
+//////////////////////////////////////////////////////////////////
+
+let loggedIn = window.localStorage.getItem("loggedIn");
+let accountId = window.localStorage.getItem("accountId");
+let account = null;
+let bets = null;
+
+if(loggedIn == null){
+	alert("you are not logged in.")
+	localStorage.clear();
+	window.location.href = "/"
+}else{
+	let logoutProfileButton = document.getElementById("logoutProfileButton");
+	let refreshBetsButton = document.getElementById("refreshBetsButton");
+	let statsButton = document.getElementById("statsButton");
+	logoutProfileButton.addEventListener("click", logout, false);
+	refreshBetsButton.addEventListener("click", refreshBets, false);
+	statsButton.addEventListener("click", gotoStats, false);
+	account = getAccount(accountId);
+	bets = getBets();
+	document.getElementById("overviewProfileId").innerText = "Id: " + account.id
+	document.getElementById("overviewProfileName").innerText = "Name: " + account.name
+	document.getElementById("overviewProfileRank").innerText = "Rang: " + account.rank
+	document.getElementById("overviewProfileMoney").innerText = "Geld: " + account.money + "€"
+	if(account.rank == "admin"){
+		let createBetButton = document.createElement("button");
+		let profileSection = document.getElementById("profile");
+		let gotoAdminPanelButton = document.createElement("button");
+		createBetButton.innerText = "Neue Wette erstellen"
+		gotoAdminPanelButton.innerText = "Admin Panel"
+		createBetButton.addEventListener("click", gotoCreateBet, false);
+		gotoAdminPanelButton.addEventListener("click", gotoAdminPanel, false);
+		profileSection.appendChild(createBetButton);
+		profileSection.appendChild(document.createElement("p"));
+		profileSection.appendChild(gotoAdminPanelButton);
+	}
+	createActiveBets(bets)
 }

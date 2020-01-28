@@ -1,4 +1,3 @@
-window.localStorage.clear();
 function sendPostRequest(data, type) {
     var xhttp = new XMLHttpRequest();
     xhttp.open("POST", "http://" + window.location.host + "/" + type, false);

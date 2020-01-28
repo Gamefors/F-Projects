@@ -613,7 +613,7 @@ app.post("/enterBet",function(req,res){
             }
         });
         updateAccountMoney(queriedAccount.id, (parseInt(queriedAccount.money) - parseInt(biddedMoney)).toString());
-        res.end("")
+        res.end("");
     }
 });
 
