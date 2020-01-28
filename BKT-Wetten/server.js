@@ -535,7 +535,7 @@ app.post("/endBet",function(req,res){
     participants = tempList
     //check if there are participants to check for a winner
     if(participants.length == 0){
-        res.end("[endBet] Kein Gewinner da niemand teilgenommen hat.")
+        res.end("Kein Gewinner da niemand teilgenommen hat.")
         //delete bet from sqlite database
         deleteBet(queriedBet.id);
     }else{
