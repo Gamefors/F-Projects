@@ -225,26 +225,22 @@ function createActiveBets(bets){
 				div.appendChild(howLateTimeP);
 			}
 		}
-
-
-///////////////////////////////////////////////////////////////
 		submitButton.addEventListener("click", function(){
 			placeBet(bet.id);
 		}, false);
 		if(account.rank == "admin"){
 			let endeBetButton = document.createElement("button");
+			let spacer2 = document.createElement("p");
 			endeBetButton.innerText = "end bet"
 			endeBetButton.addEventListener("click", function(){
 				endBet(bet.id);
 			}, false);
-			let spacer2 = document.createElement("p");
 			div.appendChild(spacer2);
 			div.appendChild(endeBetButton);
 		}
 		activeBetsSectionNew.appendChild(div);
 	});
 }
-//////////////////////////////////////////////////////////////////
 
 let loggedIn = window.localStorage.getItem("loggedIn");
 let accountId = window.localStorage.getItem("accountId");
