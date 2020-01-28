@@ -182,7 +182,6 @@ fetchDatabase();
 
 //#endregion
 
-
 //#region extra functions 
 
 function evaluateBetWinner(participants, queriedBet, res){
@@ -574,7 +573,6 @@ app.post("/enterBet",function(req,res){
         numbers.push(participant[2])
     });
     
-    //FIXME: Test this
     if(numbers.includes(delayTime)){
         res.end("false");
     }else{
