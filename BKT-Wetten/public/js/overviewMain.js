@@ -204,7 +204,7 @@ function createActiveBets(bets){
 					div.appendChild(howLateTimeP);
 				}
 			}else{
-				howLateTimeP.innerText = "Die Wette wurde geschlossen."
+				howLateTimeP.innerText = "Du hast bereits gewettet."
 				div.appendChild(howLateTimeP);
 			}
 		}else{
@@ -217,8 +217,24 @@ function createActiveBets(bets){
 					div.appendChild(spacer);
 					div.appendChild(submitButton);
 				}else{
-					howLateTimeP.innerText = "Es können keine Wetten mehr plaziert werden da die Stunde angefangen hatt."
-					div.appendChild(howLateTimeP);
+					if(betMins == 0){
+						if(currHours >= betHours){
+							if(currMins >= betMins){
+								howLateTimeP.innerText = "Es können keine Wetten mehr plaziert werden da die Stunde angefangen hatt."
+								div.appendChild(howLateTimeP);
+							}
+						}else{
+							div.appendChild(yourbidP);
+							div.appendChild(bedInput);
+							div.appendChild(howLateTimeP);
+							div.appendChild(howLateTimeInput);
+							div.appendChild(spacer);
+							div.appendChild(submitButton);
+						}
+					}else{
+						howLateTimeP.innerText = "Es können keine Wetten mehr plaziert werden da die Stunde angefangen hatt."
+						div.appendChild(howLateTimeP);
+					}
 				}
 			}else{
 				howLateTimeP.innerText = "Es können keine Wetten mehr plaziert werden da die Stunde angefangen hatt."
