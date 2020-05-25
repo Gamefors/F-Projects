@@ -1,0 +1,5 @@
+﻿  findHighestNumberInArray.cpp
+F:\Informatik_BRA\Informatik_BRA\findHighestNumberInArray.cpp(9,20): warning C4018: "<": Konflikt zwischen "signed" und "unsigned"
+  program4.cpp
+  Code wird generiert...
+  Informatik_BRA.vcxproj -> F:\Informatik_BRA\Debug\Informatik_BRA.exe
