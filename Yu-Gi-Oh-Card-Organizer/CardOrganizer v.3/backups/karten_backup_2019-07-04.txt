@@ -1,0 +1,1 @@
+monster:4-sterniger Marienkäfer der Verdammung:WIND:Stufe 3:Insekt :Effekt:800:1200:FLIPP Zerstöre alle Monster der Stufe 4, die dein Gegner kontrolliert.:Nein:1

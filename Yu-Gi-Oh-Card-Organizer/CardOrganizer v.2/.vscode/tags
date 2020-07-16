@@ -1,0 +1,22 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+Main	../Main.py	/^class Main:$/;"	kind:class	line:3
+Main.py	../Main.py	1;"	kind:file	line:1
+MonsterCard	../objects/MonsterCard.py	/^class MonsterCard:$/;"	kind:class	line:1
+MonsterCard.py	../objects/MonsterCard.py	1;"	kind:file	line:1
+SpellCard	../objects/SpellCard.py	/^class SpellCard:$/;"	kind:class	line:1
+SpellCard.py	../objects/SpellCard.py	1;"	kind:file	line:1
+TrapCard	../Main.py	/^from objects.TrapCard import TrapCard$/;"	kind:namespace	line:1
+TrapCard	../objects/TrapCard.py	/^class TrapCard:$/;"	kind:class	line:1
+TrapCard.py	../objects/TrapCard.py	1;"	kind:file	line:1
+__init__	../Main.py	/^	def __init__(self):$/;"	kind:member	line:12
+__init__	../objects/MonsterCard.py	/^    def __init__(self, name, attribute, level, monsterType, cardType, atkPoints, defPoints, text, speedDuel, quantity):$/;"	kind:member	line:2
+__init__	../objects/SpellCard.py	/^    def __init__(self, name, spellType, text, speedDuel, quantity):$/;"	kind:member	line:2
+__init__	../objects/TrapCard.py	/^    def __init__(self, name, trapType, text, speedDuel, quantity):$/;"	kind:member	line:2
+addCard	../Main.py	/^	def addCard(self, url):$/;"	kind:member	line:8
+createLists	../Main.py	/^	def createLists(self):$/;"	kind:member	line:5
+webdriver	../Main.py	/^from selenium import webdriver$/;"	kind:namespace	line:2

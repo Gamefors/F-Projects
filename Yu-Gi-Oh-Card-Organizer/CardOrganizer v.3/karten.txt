@@ -1,0 +1,2 @@
+monster:4-sterniger Marienkäfer der Verdammung:WIND:Stufe 3:Insekt :Effekt:800:1200:FLIPP Zerstöre alle Monster der Stufe 4, die dein Gegner kontrolliert.:Nein:1
+spell:Riryoku:Normal:Wähle 2 offene Monster auf dem Spielfeld; halbiere die ATK von 1 Monster und falls du dies tust, füge dem anderen Monster die verlorenen ATK hinzu. Diese Effekte dauern bis zum Ende dieses Spielzugs an.:Nein:1
