@@ -1,0 +1,99 @@
+* {
+    box-sizing: border-box;
+  }
+  
+.column {
+    outline: none;
+    float: left;
+    width: 333px;
+    padding: 10px;
+    height: 333px;
+    background-color: #aaa;
+    margin-right: 5px;
+
+    border-style: hidden;
+    border-color: red;
+    border-radius: 3px;
+    border-width: 5px;
+}
+
+img{
+    padding-bottom: 10px;
+}
+
+.row{
+    margin-bottom: 5px;
+}
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    appearance: none;
+    outline: 0;
+    box-shadow: none;
+    border: 0 !important;
+    background: #2c3e50;
+    background-image: none;
+  }
+  /* Remove IE arrow */
+  select::-ms-expand {
+    display: none;
+  }
+  /* Custom Select */
+  .select {
+    margin-bottom: 10px;
+    position: relative;
+    display: flex;
+    width: 665px;
+    height: 3em;
+    line-height: 3;
+    background: #2c3e50;
+    overflow: hidden;
+    border-radius: .25em;
+  }
+  select {
+    flex: 1;
+    padding: 0 .5em;
+    color: #fff;
+    cursor: pointer;
+  }
+  /* Arrow */
+  .select::after {
+    content: '\25BC';
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0 1em;
+    background: #34495e;
+    cursor: pointer;
+    pointer-events: none;
+  }
+  /* Transition */
+  .select:hover::after {
+    color: #f39c12;
+  }
+
+
+  .text-input {
+      position: relative;
+      margin-top: 10px;
+      margin-bottom: 10px;
+ }
+  .text-input input[type="text"] {
+      font-size: 40px;
+      display: inline-block;
+      width: 665px;
+      height: 100px;
+      box-sizing: border-box;
+      outline: none;
+      border: 1px solid lightgray;
+      border-radius: 3px;
+      padding: 10px;
+ }
