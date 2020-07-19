@@ -20,8 +20,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.Inet4Address;
-
 public class MainActivity extends AppCompatActivity {
     int baseLeftMarginForKBox = 7;
     int baseTopMarginForKBox = 1090;
@@ -40,7 +38,8 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout createLegoLayout(final String box, String pictureName, String text, final String x, final String y, final ScrollView scrollView, final GridLayout gridLayout, final SearchView searchView){
         LinearLayout legoLayout = new LinearLayout(this);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.setMargins(55,55,0,0);
+        params.width = 400;
+        params.setMargins(90,55,0,0);
         legoLayout.setLayoutParams(params);
         legoLayout.setOrientation(LinearLayout.VERTICAL);
         ImageView legoImage = new ImageView(this);
@@ -75,8 +74,6 @@ public class MainActivity extends AppCompatActivity {
                 }
 
 
-
-                //TODO: move red dot
                 ConstraintLayout.LayoutParams p = (ConstraintLayout.LayoutParams) redIdentifier.getLayoutParams();
                 if(box.equals("g")){
                     p.setMargins(baseLeftMarginForGBox + (gXOffset * Integer.parseInt(x)), baseTopMarginForGBox- (gYOffset * Integer.parseInt(y)), 0, 0);
@@ -107,9 +104,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void readData(GridLayout gridLayout, ScrollView scrollView, SearchView searchView) throws JSONException {
-        String data = "[\n" +
-                "    {\"box\": \"g\", \"pictureName\": \"foto1.png\", \"text\": \"Brick 2x2 Rot\", \"x\": 3, \"y\": 3},\n" +
-                "]";
+
+
+        String data = "[{\"box\": \"k\", \"pictureName\": \"1.png\", \"text\": \"Brick 1x1x5 2453\", \"x\": 0, \"y\": 29}, {\"box\": \"k\", \"pictureName\": \"2.png\", \"text\": \"Support 1x1x6 Solid Pillar 43888\", \"x\": 1, \"y\": 29}, {\"box\": \"k\", \"pictureName\": \"3.png\", \"text\": \"Brick 1x2x2 3245b\", \"x\": 2, \"y\": 29}, {\"box\": \"k\", \"pictureName\": \"5.png\", \"text\": \"Brick 2x2x3 30145\", \"x\": 4, \"y\": 29}, {\"box\": \"k\", \"pictureName\": \"6.png\", \"text\": \"Brick 2x4x3 30144\", \"x\": 5, \"y\": 29}, {\"box\": \"k\", \"pictureName\": \"7.png\", \"text\": \"Plate 3x3 Cross 15397\", \"x\": 0, \"y\": 28}, {\"box\": \"k\", \"pictureName\": \"8.png\", \"text\": \"Platze, Modified 4x4 with 2x2 Cutout 64799\", \"x\": 1, \"y\": 28}, {\"box\": \"k\", \"pictureName\": \"9.png\", \"text\": \"Plate, Modified 1x4 with 2 Studs 92593\", \"x\": 2, \"y\": 28}, {\"box\": \"k\", \"pictureName\": \"10.png\", \"text\": \"Tile, Modified 2x2 with Studs on Edge\", \"x\": 3, \"y\": 28}, {\"box\": \"k\", \"pictureName\": \"11.png\", \"text\": \"Tile 2x4 87079\", \"x\": 4, \"y\": 28}, {\"box\": \"k\", \"pictureName\": \"12.png\", \"text\": \"Tile, Modified 2x2 Inverted 11203\", \"x\": 5, \"y\": 28}, {\"box\": \"k\", \"pictureName\": \"13.png\", \"text\": \"Brick, Modified 1x2 with Groove 4216\", \"x\": 0, \"y\": 27}, {\"box\": \"k\", \"pictureName\": \"14.png\", \"text\": \"Brick, Modified 1x2x5 with Groove \", \"x\": 1, \"y\": 27}, {\"box\": \"k\", \"pictureName\": \"15.png\", \"text\": \"Brick, Modified 1x2 with Masonry Profile (Brick Profile) 98283\", \"x\": 2, \"y\": 27}, {\"box\": \"k\", \"pictureName\": \"16.png\", \"text\": \"Brick, Modified 1x4 with Masonry Profile (Brick Profile) 15533\", \"x\": 3, \"y\": 27}, {\"box\": \"k\", \"pictureName\": \"17.png\", \"text\": \"Brick, Modified 1x4 Log 30137\", \"x\": 4, \"y\": 27}, {\"box\": \"k\", \"pictureName\": \"17.png\", \"text\": \"Brick, Modified 1x4 Log 30137\", \"x\": 5, \"y\": 27}, {\"box\": \"k\", \"pictureName\": \"18.png\", \"text\": \"Brick, Modified 1x1 with Scroll with Hollow Stud 20310\", \"x\": 0, \"y\": 26}, {\"box\": \"k\", \"pictureName\": \"19.png\", \"text\": \"Plate, Modified 1x2 with Ladder 4175\", \"x\": 1, \"y\": 26}, {\"box\": \"k\", \"pictureName\": \"20.png\", \"text\": \"Door Frame 1x4x6 with Two Holes on Top and Bottom 60596/30179\", \"x\": 2, \"y\": 26}, {\"box\": \"k\", \"pictureName\": \"21.png\", \"text\": \"Window 1x4x6 Frame with 3 Panes 57894\", \"x\": 3, \"y\": 26}, {\"box\": \"k\", \"pictureName\": \"22.png\", \"text\": \"Door 1x4x6 with 4 Panes and Stud Handle 60623\", \"x\": 4, \"y\": 26}, {\"box\": \"k\", \"pictureName\": \"23.png\", \"text\": \"Fence 1x4x2 Spindled with 4 Studs 15332/30055\", \"x\": 5, \"y\": 26}]";
+
         JSONArray result = new JSONArray(data);
         legos = result;
         for (int i=0; i < result.length(); i++)

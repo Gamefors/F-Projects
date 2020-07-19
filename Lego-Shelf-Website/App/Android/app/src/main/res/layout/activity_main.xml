@@ -49,7 +49,7 @@
                 android:id="@+id/gridLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:columnCount="3"
+                app:columnCount="2"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
