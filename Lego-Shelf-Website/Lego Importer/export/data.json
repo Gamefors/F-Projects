@@ -1,7 +1,0 @@
-[
-    {"box": "k", "pictureName": "foto1.png", "text": "Brick 2x2 Rot", "x": 0, "y": 0},
-    {"box": "k", "pictureName": "foto2.png", "text": "Brick 2x2 Gelb", "x": 1, "y": 1}, 
-    {"box": "k", "pictureName": "foto3.png", "text": "Brick 3x3 Gruen", "x": 2, "y": 2},
-    {"box": "k", "pictureName": "foto4.png", "text": "Beam 3x3 Gruen", "x": 5, "y": 5},
-    {"box": "k", "pictureName": "foto5.png", "text": "Stud 1x1 Lila", "x": 6, "y": 2}
-]
